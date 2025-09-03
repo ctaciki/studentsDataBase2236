@@ -35,7 +35,56 @@ void displayStudents(const std::vector<Student>& database) {
         std::cout << "Средний балл: " << student.gpa << "\n\n";
     }
 }
+void searchName(const std::vector<Student>& database) {
+    std::string name;
 
+    std::cout << "Введите имя студента: ";
+    std::getline(std::cin, name); // Используем getline для чтения строки с пробелами
+
+    bool found = false; // Флаг для проверки, найден ли студент
+    for (const Student& student : database) {
+        if (name == student.name) {
+            std::cout << "Имя: " << student.name << "\n";
+            std::cout << "Возраст: " << student.age << "\n";
+            std::cout << "Специальность: " << student.major << "\n";
+            std::cout << "Средний балл: " << student.gpa << "\n\n";
+            found = true;
+        }
+    }
+
+    if (!found) {
+        std::cout << "Студент с именем \"" << name << "\" не найден.\n";
+    }
+
+    
+    
+
+}
+void searcSpecс(const std::vector<Student>& database) {
+    std::string spec;
+
+    std::cout << "Введите спецу: ";
+    std::getline(std::cin, spec); // Используем getline для чтения строки с пробелами
+
+    bool found = false; // Флаг для проверки, найден ли студент
+    for (const Student& student : database) {
+        if (spec == student.major) {
+            std::cout << "Имя: " << student.name << "\n";
+            std::cout << "Возраст: " << student.age << "\n";
+            std::cout << "Специальность: " << student.major << "\n";
+            std::cout << "Средний балл: " << student.gpa << "\n\n";
+            found = true;
+        }
+    }
+
+    if (!found) {
+        std::cout << "Студент с спецой \"" << major << "\" не найден.\n";
+    }
+
+    
+    
+
+}
 int main() {
     std::vector<Student> database;
 
@@ -62,7 +111,7 @@ int main() {
                 break;
               case 4:
                searchSpec(database);
-                break;
+               break;
             case 0:
                 std::cout << "Выход из программы.\n";
                 break;
