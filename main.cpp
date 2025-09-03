@@ -9,7 +9,6 @@ struct Student {
     double gpa;
 };
 
-// Функция для добавления студента в базу данных
 void addStudent(std::vector<Student>& database) {
     Student student;
     std::cout << "Введите имя студента: ";
@@ -25,7 +24,6 @@ void addStudent(std::vector<Student>& database) {
     std::cout << "Студент добавлен в базу данных.\n";
 }
 
-// Функция для вывода всех студентов из базы данных
 void displayStudents(const std::vector<Student>& database) {
     std::cout << "Список студентов:\n";
     for (const Student& student : database) {
@@ -37,11 +35,9 @@ void displayStudents(const std::vector<Student>& database) {
 }
 void searchName(const std::vector<Student>& database) {
     std::string name;
-
     std::cout << "Введите имя студента: ";
-    std::getline(std::cin, name); // Используем getline для чтения строки с пробелами
-
-    bool found = false; // Флаг для проверки, найден ли студент
+    std::getline(std::cin, name); 
+    bool found = false;
     for (const Student& student : database) {
         if (name == student.name) {
             std::cout << "Имя: " << student.name << "\n";
@@ -55,18 +51,14 @@ void searchName(const std::vector<Student>& database) {
     if (!found) {
         std::cout << "Студент с именем \"" << name << "\" не найден.\n";
     }
-
-    
-    
-
 }
 void searcSpecс(const std::vector<Student>& database) {
     std::string spec;
 
     std::cout << "Введите спецу: ";
-    std::getline(std::cin, spec); // Используем getline для чтения строки с пробелами
+    std::getline(std::cin, spec); 
 
-    bool found = false; // Флаг для проверки, найден ли студент
+    bool found = false; 
     for (const Student& student : database) {
         if (spec == student.major) {
             std::cout << "Имя: " << student.name << "\n";
@@ -80,10 +72,6 @@ void searcSpecс(const std::vector<Student>& database) {
     if (!found) {
         std::cout << "Студент с спецой \"" << major << "\" не найден.\n";
     }
-
-    
-    
-
 }
 int main() {
     std::vector<Student> database;
@@ -93,7 +81,7 @@ int main() {
         std::cout << "Меню:\n";
         std::cout << "1. Добавить студента\n";
         std::cout << "2. Вывести список студентов\n";
-                std::cout << "3. найти по имени\n";
+        std::cout << "3. найти по имени\n";
         std::cout << "4. найти по спеце\n";
         std::cout << "0. Выход\n";
         std::cout << "Выберите действие: ";
