@@ -22,6 +22,7 @@ jobs:
         sudo cmake --build build
         sudo cp build/lib/lib*.a /usr/lib
     - name: Compile
-      run: g++ -std=c++17 main.cpp -lgtest -lgtest_main -pthread -o test_program
+      run: g++ -std=c++14 main.cpp -lgtest -lgtest_main -pthread -o test_program
     - name: Run tests
       run: ./test_program --gtest_filter=FunctionTesting.AddStudent
+      timeout-minutes: 5
