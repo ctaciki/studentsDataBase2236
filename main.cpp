@@ -112,6 +112,11 @@ TEST(FunctionTesting, AddStudent) {
 }
 
 int main(int argc, char **argv) {
+    if (argc > 1 && std::string(argv[1]) == "--run-tests") {
+        ::testing::InitGoogleTest(&argc, argv);
+        return RUN_ALL_TESTS();
+    }
+
     std::vector<Student> database;
     loadStudents(database, "bd.txt");
     int choice;
@@ -142,7 +147,7 @@ int main(int argc, char **argv) {
                 ::testing::InitGoogleTest(&argc, argv);
                 return RUN_ALL_TESTS();
             case 0:
-                std::cout << "Выход\n";
+                std::cout << "Выход из программы.\n";
                 break;
             default:
                 std::cout << "Неверный выбор. Попробуйте снова.\n";
