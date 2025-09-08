@@ -3,6 +3,7 @@
 #include <string>
 #include <fstream>
 #include <sstream>
+#include "gtest/gtest.h"
 
 // структура студента
 struct Student {
@@ -36,13 +37,13 @@ void loadStudents(std::vector<Student>& database, const std::string& filename) {
 void addStudent(std::vector<Student>& database) {
     Student student;
     std::cout << "Введите имя студента: ";
-    std::cin.ignore(); // Clear input buffer
-    std::getline(std::cin, student.name); // Allow spaces in name
+    std::cin.ignore(); 
+    std::getline(std::cin, student.name); 
     std::cout << "Введите возраст студента: ";
     std::cin >> student.age;
     std::cout << "Введите специальность студента: ";
     std::cin.ignore();
-    std::getline(std::cin, student.major); // Allow spaces in major
+    std::getline(std::cin, student.major); 
     std::cout << "Введите средний балл студента: ";
     std::cin >> student.gpa;
 
@@ -65,8 +66,8 @@ void displayStudents(const std::vector<Student>& database) {
 void searchName(const std::vector<Student>& database) {
     std::string name;
     std::cout << "Введите имя студента: ";
-    std::cin.ignore(); // Clear input buffer
-    std::getline(std::cin, name); // Allow spaces in name
+    std::cin.ignore(); 
+    std::getline(std::cin, name); 
     bool found = false;
     for (const Student& student : database) {
         if (name == student.name) {
@@ -87,8 +88,8 @@ void searchName(const std::vector<Student>& database) {
 void searcSpecс(const std::vector<Student>& database) {
     std::string spec;
     std::cout << "Введите специальность: ";
-    std::cin.ignore(); // Clear input buffer
-    std::getline(std::cin, spec); // Allow spaces in spec
+    std::cin.ignore(); 
+    std::getline(std::cin, spec); 
     bool found = false;
     for (const Student& student : database) {
         if (spec == student.major) {
@@ -130,7 +131,7 @@ int main() {
                 searchName(database);
                 break;
             case 4:
-                searcSpecс(database); // Corrected function name
+                searcSpecс(database); 
                 break;
             case 0:
                 std::cout << "Выход из программы.\n";
