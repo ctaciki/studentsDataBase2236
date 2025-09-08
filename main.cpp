@@ -3,16 +3,18 @@
 #include <string>
 #include <fstream>
 #include <sstream>
-//структура студента
+
+// структура студента
 struct Student {
     std::string name;
     int age;
     std::string major;
     double gpa;
 };
-// функүиә для чтения  из файла
+
+// функция для чтения из файла
 void loadStudents(std::vector<Student>& database, const std::string& filename) {
-    std::ifstream file(filename); // Исправлено: использование filename
+    std::ifstream file(filename);
     if (!file.is_open()) {
         std::cout << "не удалось открыть файл " << filename << "\n";
         return;
@@ -22,29 +24,33 @@ void loadStudents(std::vector<Student>& database, const std::string& filename) {
     while (std::getline(file, line)) {
         std::istringstream iss(line);
         Student student;
-        if (iss >> student.name >> student.age >> student.spec >> student.gpa) {
+        if (iss >> student.name >> student.age >> student.major >> student.gpa) {
             database.push_back(student);
         } else {
-            std::cout << "ошибка чтения " << line << "\n";
+            std::cout << "ошибка чтения строки" << line << "\n";
         }
     }
 }
-//функүиә добавлениә студента в бд
+
+// функция добавления студента в базу данных
 void addStudent(std::vector<Student>& database) {
     Student student;
     std::cout << "Введите имя студента: ";
-    std::cin >> student.name;
+    std::cin.ignore(); // Clear input buffer
+    std::getline(std::cin, student.name); // Allow spaces in name
     std::cout << "Введите возраст студента: ";
     std::cin >> student.age;
     std::cout << "Введите специальность студента: ";
-    std::cin >> student.major;
+    std::cin.ignore();
+    std::getline(std::cin, student.major); // Allow spaces in major
     std::cout << "Введите средний балл студента: ";
     std::cin >> student.gpa;
 
     database.push_back(student);
     std::cout << "Студент добавлен в базу данных.\n";
 }
-//отобразитғ инфу о студенте из бд
+
+// отобразить информацию о студентах из базы данных
 void displayStudents(const std::vector<Student>& database) {
     std::cout << "Список студентов:\n";
     for (const Student& student : database) {
@@ -54,11 +60,13 @@ void displayStudents(const std::vector<Student>& database) {
         std::cout << "Средний балл: " << student.gpa << "\n\n";
     }
 }
-//најти инфу о студенте и вывести ее из бд по имени
+
+// найти информацию о студенте по имени
 void searchName(const std::vector<Student>& database) {
     std::string name;
     std::cout << "Введите имя студента: ";
-    std::getline(std::cin, name); 
+    std::cin.ignore(); // Clear input buffer
+    std::getline(std::cin, name); // Allow spaces in name
     bool found = false;
     for (const Student& student : database) {
         if (name == student.name) {
@@ -74,14 +82,14 @@ void searchName(const std::vector<Student>& database) {
         std::cout << "Студент с именем \"" << name << "\" не найден.\n";
     }
 }
-//најти инфу о студенте и вывести ее из бд по спеүиалғности
+
+// найти информацию о студенте по специальности
 void searcSpecс(const std::vector<Student>& database) {
     std::string spec;
-
-    std::cout << "Введите спецу: ";
-    std::getline(std::cin, spec); 
-
-    bool found = false; 
+    std::cout << "Введите специальность: ";
+    std::cin.ignore(); // Clear input buffer
+    std::getline(std::cin, spec); // Allow spaces in spec
+    bool found = false;
     for (const Student& student : database) {
         if (spec == student.major) {
             std::cout << "Имя: " << student.name << "\n";
@@ -93,19 +101,20 @@ void searcSpecс(const std::vector<Student>& database) {
     }
 
     if (!found) {
-        std::cout << "Студент с спецой \"" << major << "\" не найден.\n";
+        std::cout << "Студент со специальностью \"" << spec << "\" не найден.\n";
     }
 }
+
 int main() {
     std::vector<Student> database;
-    loadStudents(database, "bd.txt"); // Указываем имя файла здесь
+    loadStudents(database, "bd.txt"); // Указываем имя файла
     int choice;
     do {
         std::cout << "Меню:\n";
         std::cout << "1. Добавить студента\n";
         std::cout << "2. Вывести список студентов\n";
-        std::cout << "3. найти по имени\n";
-        std::cout << "4. найти по спеце\n";
+        std::cout << "3. Найти по имени\n";
+        std::cout << "4. Найти по специальности\n";
         std::cout << "0. Выход\n";
         std::cout << "Выберите действие: ";
         std::cin >> choice;
@@ -117,12 +126,12 @@ int main() {
             case 2:
                 displayStudents(database);
                 break;
-              case 3:
+            case 3:
                 searchName(database);
                 break;
-              case 4:
-               searchSpecc(database);
-               break;
+            case 4:
+                searcSpecс(database); // Corrected function name
+                break;
             case 0:
                 std::cout << "Выход из программы.\n";
                 break;
