@@ -3,6 +3,7 @@
 #include <string>
 #include <fstream>
 #include <sstream>
+#include <limits>
 #include "gtest/gtest.h"
 
 struct Student {
@@ -33,15 +34,23 @@ void loadStudents(std::vector<Student>& database, const std::string& filename) {
 void addStudent(std::vector<Student>& database) {
     Student student;
     std::cout << "Введите имя студента: ";
-    std::cin.ignore();
+    std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
     std::getline(std::cin, student.name);
     std::cout << "Введите возраст студента: ";
-    std::cin >> student.age;
+    while (!(std::cin >> student.age) || student.age < 0) {
+        std::cout << "Неверный возраст. Введите положительное число: ";
+        std::cin.clear();
+        std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+    }
     std::cout << "Введите специальность студента: ";
-    std::cin.ignore();
+    std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
     std::getline(std::cin, student.major);
     std::cout << "Введите средний балл студента: ";
-    std::cin >> student.gpa;
+    while (!(std::cin >> student.gpa) || student.gpa < 0.0 || student.gpa > 5.0) {
+        std::cout << "Неверный балл. Введите число от 0.0 до 5.0: ";
+        std::cin.clear();
+        std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+    }
     database.push_back(student);
     std::cout << "Студент добавлен в базу данных.\n";
 }
@@ -59,7 +68,7 @@ void displayStudents(const std::vector<Student>& database) {
 void searchName(const std::vector<Student>& database) {
     std::string name;
     std::cout << "Введите имя студента: ";
-    std::cin.ignore();
+    std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
     std::getline(std::cin, name);
     bool found = false;
     for (const Student& student : database) {
@@ -79,7 +88,7 @@ void searchName(const std::vector<Student>& database) {
 void searchSpec(const std::vector<Student>& database) {
     std::string spec;
     std::cout << "Введите специальность: ";
-    std::cin.ignore();
+    std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
     std::getline(std::cin, spec);
     bool found = false;
     for (const Student& student : database) {
@@ -129,7 +138,12 @@ int main(int argc, char **argv) {
         std::cout << "5. Запустить тесты\n";
         std::cout << "0. Выход\n";
         std::cout << "Выберите действие: ";
-        std::cin >> choice;
+        if (!(std::cin >> choice)) {
+            std::cout << "Неверный выбор. Попробуйте снова.\n";
+            std::cin.clear();
+            std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+            continue;
+        }
         switch (choice) {
             case 1:
                 addStudent(database);
