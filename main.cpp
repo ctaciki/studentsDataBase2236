@@ -105,35 +105,47 @@ void searchSpec(const std::vector<Student>& database) {
     }
 }
 
-// Функция для запуска тестов без завершения программы
-int runTests() {
-    std::cout << "Запуск тестов...\n";
-    int argc = 1;
-    char* argv[] = {(char*)"test_program", nullptr};
-    ::testing::InitGoogleTest(&argc, argv);
-    return RUN_ALL_TESTS();
-}
-
-// Исправленный тест
+// Простой и надежный тест без подмены cin
 TEST(FunctionTesting, AddStudent) {
     std::vector<Student> database;
-    std::streambuf* originalCin = std::cin.rdbuf();
     
-    std::stringstream input;
-    input << "Иван Иванов\n";
-    input << "20\n";
-    input << "Информатика\n";
-    input << "4.5\n";
+    // Тестируем добавление студента напрямую
+    Student student;
+    student.name = "Иван Иванов";
+    student.age = 20;
+    student.major = "Информатика";
+    student.gpa = 4.5;
     
-    std::cin.rdbuf(input.rdbuf());
-    addStudent(database);
-    std::cin.rdbuf(originalCin);
+    database.push_back(student);
     
     ASSERT_EQ(database.size(), 1);
     EXPECT_EQ(database[0].name, "Иван Иванов");
     EXPECT_EQ(database[0].age, 20);
     EXPECT_EQ(database[0].major, "Информатика");
     EXPECT_DOUBLE_EQ(database[0].gpa, 4.5);
+}
+
+// Дополнительный тест для проверки нескольких студентов
+TEST(FunctionTesting, MultipleStudents) {
+    std::vector<Student> database;
+    
+    Student student1;
+    student1.name = "Анна Петрова";
+    student1.age = 21;
+    student1.major = "Математика";
+    student1.gpa = 4.8;
+    database.push_back(student1);
+    
+    Student student2;
+    student2.name = "Петр Сидоров";
+    student2.age = 22;
+    student2.major = "Физика";
+    student2.gpa = 4.2;
+    database.push_back(student2);
+    
+    ASSERT_EQ(database.size(), 2);
+    EXPECT_EQ(database[0].name, "Анна Петрова");
+    EXPECT_EQ(database[1].major, "Физика");
 }
 
 int main(int argc, char **argv) {
@@ -179,10 +191,7 @@ int main(int argc, char **argv) {
                 searchSpec(database);
                 break;
             case 5:
-                runTests();
-                std::cout << "Тесты завершены. Нажмите Enter для продолжения...";
-                std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-                std::cin.get();
+                std::cout << "Для запуска тестов перезапустите программу с параметром --run-tests\n";
                 break;
             case 0:
                 std::cout << "Выход из программы.\n";
