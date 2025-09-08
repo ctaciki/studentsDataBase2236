@@ -22,7 +22,7 @@ void loadStudents(std::vector<Student>& database, const std::string& filename) {
     while (std::getline(file, line)) {
         std::istringstream iss(line);
         Student student;
-        if (iss >> student.name >> student.age >> student.major >> student.gpa) {
+        if (iss >> student.name >> student.age >> student.spec >> student.gpa) {
             database.push_back(student);
         } else {
             std::cout << "ошибка чтения " << line << "\n";
@@ -121,7 +121,7 @@ int main() {
                 searchName(database);
                 break;
               case 4:
-               searchSpec(database);
+               searchSpecc(database);
                break;
             case 0:
                 std::cout << "Выход из программы.\n";
