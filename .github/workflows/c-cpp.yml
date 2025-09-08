@@ -1,7 +1,20 @@
-  GNU nano 7.2   .github/workflows/c-cpp.yml
+name: C/C++ CI
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
       name: Checkout code
     - name: Install dependencies
-      run: sudo apt-get update && sudo apt-get install -y>
+      run: sudo apt-get update && sudo apt-get install -y googletest libgtest-dev build-essential
     - name: Build Google Test
       run: |
         cd /usr/src/gtest
@@ -9,6 +22,6 @@
         sudo make
         sudo cp *.a /usr/lib
     - name: Compile
-      run: g++ -std=c++11 main.cpp -lgtest -lgtest_main ->
+      run: g++ -std=c++11 main.cpp -lgtest -lgtest_main -pthread -o test_program
     - name: Run tests
-      run: ./test_program --gtest_filter=FunctionTesting.
+      run: ./test_program --gtest_filter=FunctionTesting.AddStudent
