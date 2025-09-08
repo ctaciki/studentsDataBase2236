@@ -1,14 +1,27 @@
-name: Install dependencies
-      run: sudo apt-get update && sudo apt-get install -y>
+name: C/C++ CI
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+      name: Checkout code
+    - name: Install dependencies
+      run: sudo apt-get update && sudo apt-get install -y googletest libgtest-dev build-essential
     - name: Build Google Test
       run: |
         cd /usr/src/googletest
         sudo cmake -S . -B build
         sudo cmake --build build
-        sudo cp build/googletest/lib*.a /usr/lib
+        sudo cp build/lib/lib*.a /usr/lib
     - name: Compile
-      run: g++ -std=c++11 main.cpp -lgtest -lgtest_main ->
+      run: g++ -std=c++11 main.cpp -lgtest -lgtest_main -pthread -o test_program
     - name: Run tests
-      run: ./test_program --gtest_filter=FunctionTesting.>
-
-
+      run: ./test_program --gtest_filter=FunctionTesting.AddStudent
