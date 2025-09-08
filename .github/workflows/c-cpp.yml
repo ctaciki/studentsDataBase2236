@@ -8,14 +8,20 @@ on:
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
 
     steps:
     - uses: actions/checkout@v3
-    - name: installation
-      run: sudo apt install -y googletest libgtest-dev build-essential gcovr
-    - name: make
-      run: make
-    - name: execute
-      run: ./program.out
+      name: Checkout code
+    - name: Install dependencies
+      run: sudo apt-get update && sudo apt-get install -y googletest libgtest-dev build-essential
+    - name: Build Google Test
+      run: |
+        cd /usr/src/gtest
+        sudo cmake CMakeLists.txt
+        sudo make
+        sudo cp *.a /usr/lib
+    - name: Compile
+      run: g++ -std=c++11 main.cpp -lgtest -lgtest_main -pthread -o test_program
+    - name: Run tests
+      run: ./test_program --gtest_filter=FunctionTesting.AddStudent
