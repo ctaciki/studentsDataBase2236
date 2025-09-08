@@ -74,7 +74,7 @@ void searchName(const std::vector<Student>& database) {
     for (const Student& student : database) {
         if (name == student.name) {
             std::cout << "Имя: " << student.name << "\n";
-            std::cout << "Возраст: " << student.age << "\n";
+            std::cout << "Возраст: "" << student.age << "\n";
             std::cout << "Специальность: " << student.major << "\n";
             std::cout << "Средний балл: " << student.gpa << "\n\n";
             found = true;
@@ -105,16 +105,28 @@ void searchSpec(const std::vector<Student>& database) {
     }
 }
 
-// Исправленный тест - добавляем переносы строк после КАЖДОГО числа
+// Функция для запуска тестов без завершения программы
+void runTests() {
+    std::cout << "Запуск тестов...\n";
+    int argc = 1;
+    char* argv[] = {(char*)"test_program", nullptr};
+    ::testing::InitGoogleTest(&argc, argv);
+    RUN_ALL_TESTS();
+    std::cout << "Тесты завершены. Нажмите Enter для продолжения...";
+    std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+    std::cin.get();
+}
+
+// Исправленный тест
 TEST(FunctionTesting, AddStudent) {
     std::vector<Student> database;
     std::streambuf* originalCin = std::cin.rdbuf();
     
     std::stringstream input;
-    input << "Иван Иванов\n";    // имя + \n
-    input << "20\n";             // возраст + \n  
-    input << "Информатика\n";    // специальность + \n
-    input << "4.5\n";            // GPA + \n
+    input << "Иван Иванов\n";
+    input << "20\n";
+    input << "Информатика\n";
+    input << "4.5\n";
     
     std::cin.rdbuf(input.rdbuf());
     addStudent(database);
@@ -128,14 +140,17 @@ TEST(FunctionTesting, AddStudent) {
 }
 
 int main(int argc, char **argv) {
+    // Режим тестирования (для CI)
     if (argc > 1 && std::string(argv[1]) == "--run-tests") {
         ::testing::InitGoogleTest(&argc, argv);
         return RUN_ALL_TESTS();
     }
 
+    // Обычный режим работы
     std::vector<Student> database;
     loadStudents(database, "bd.txt");
     int choice;
+    
     do {
         std::cout << "Меню:\n";
         std::cout << "1. Добавить студента\n";
@@ -145,12 +160,14 @@ int main(int argc, char **argv) {
         std::cout << "5. Запустить тесты\n";
         std::cout << "0. Выход\n";
         std::cout << "Выберите действие: ";
+        
         if (!(std::cin >> choice)) {
             std::cout << "Неверный выбор. Попробуйте снова.\n";
             std::cin.clear();
             std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
             continue;
         }
+        
         switch (choice) {
             case 1:
                 addStudent(database);
@@ -165,14 +182,19 @@ int main(int argc, char **argv) {
                 searchSpec(database);
                 break;
             case 5:
-                ::testing::InitGoogleTest(&argc, argv);
-                return RUN_ALL_TESTS();
+                runTests(); // Не завершаем программу!
+                break;
             case 0:
                 std::cout << "Выход из программы.\n";
                 break;
             default:
                 std::cout << "Неверный выбор. Попробуйте снова.\n";
         }
+        
+        // Очищаем буфер после каждого выбора
+        std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+        
     } while (choice != 0);
+    
     return 0;
 }
