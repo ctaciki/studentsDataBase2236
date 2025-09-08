@@ -1,14 +1,14 @@
 #include <iostream>
 #include <vector>
 #include <string>
-
+//структура студента
 struct Student {
     std::string name;
     int age;
     std::string major;
     double gpa;
 };
-
+//функүиә добавлениә студента в бд
 void addStudent(std::vector<Student>& database) {
     Student student;
     std::cout << "Введите имя студента: ";
@@ -23,7 +23,7 @@ void addStudent(std::vector<Student>& database) {
     database.push_back(student);
     std::cout << "Студент добавлен в базу данных.\n";
 }
-
+//отобразитғ инфу о студенте из бд
 void displayStudents(const std::vector<Student>& database) {
     std::cout << "Список студентов:\n";
     for (const Student& student : database) {
@@ -33,6 +33,7 @@ void displayStudents(const std::vector<Student>& database) {
         std::cout << "Средний балл: " << student.gpa << "\n\n";
     }
 }
+//најти инфу о студенте и вывести ее из бд по имени
 void searchName(const std::vector<Student>& database) {
     std::string name;
     std::cout << "Введите имя студента: ";
@@ -52,6 +53,7 @@ void searchName(const std::vector<Student>& database) {
         std::cout << "Студент с именем \"" << name << "\" не найден.\n";
     }
 }
+//најти инфу о студенте и вывести ее из бд по спеүиалғности
 void searcSpecс(const std::vector<Student>& database) {
     std::string spec;
 
