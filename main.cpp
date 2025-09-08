@@ -106,7 +106,7 @@ void searcSpecс(const std::vector<Student>& database) {
     }
 }
 
-int main() {
+int main(int argc, char **argv){
     std::vector<Student> database;
     loadStudents(database, "bd.txt"); // Указываем имя файла
     int choice;
@@ -119,7 +119,20 @@ int main() {
         std::cout << "0. Выход\n";
         std::cout << "Выберите действие: ";
         std::cin >> choice;
-
+        TEST(FunctionTesting, AddStudent) {
+            std::vector<Student> database;
+            std::streambuf* originalCin = std::cin.rdbuf();
+            std::stringstream input;
+            input << "Иван Иванов\n20\nИнформатика\n4.5\n";
+            std::cin.rdbuf(input.rdbuf());
+            addStudent(database);
+            std::cin.rdbuf(originalCin);
+            ASSERT_EQ(database.size(), 1);
+            EXPECT_EQ(database[0].name, "Иван Иванов");
+            EXPECT_EQ(database[0].age, 20);
+            EXPECT_EQ(database[0].major, "Информатика");
+            EXPECT_DOUBLE_EQ(database[0].gpa, 4.5);
+        }
         switch (choice) {
             case 1:
                 addStudent(database);
@@ -141,5 +154,5 @@ int main() {
         }
     } while (choice != 0);
 
-    return 0;
-}
+    ::testing::InitGoogleTest(&argc, argv);
+   return RUN_ALL_TESTS();}
