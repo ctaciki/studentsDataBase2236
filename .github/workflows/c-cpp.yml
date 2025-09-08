@@ -13,16 +13,23 @@ jobs:
     steps:
     - uses: actions/checkout@v3
       name: Checkout code
+    
     - name: Install dependencies
-      run: sudo apt-get update && sudo apt-get install -y googletest libgtest-dev build-essential
+      run: sudo apt-get update && sudo apt-get install -y libgtest-dev build-essential cmake
+    
     - name: Build Google Test
       run: |
         cd /usr/src/googletest
+
         sudo cmake -S . -B build
         sudo cmake --build build
         sudo cp build/lib/lib*.a /usr/lib
+    
     - name: Compile
       run: g++ -std=c++14 main.cpp -lgtest -lgtest_main -pthread -o test_program
-    - name: Run tests
-      run: ./test_program --gtest_filter=FunctionTesting.AddStudent
-      timeout-minutes: 5
+    
+    - name: Run tests with timeout
+      run: timeout 30s ./test_program --gtest_filter=FunctionTesting.AddStudent
+    
+    - name: Run all tests
+      run: timeout 60s ./test_program

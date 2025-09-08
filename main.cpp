@@ -105,14 +105,21 @@ void searchSpec(const std::vector<Student>& database) {
     }
 }
 
+// Исправленный тест - добавляем переносы строк после КАЖДОГО числа
 TEST(FunctionTesting, AddStudent) {
     std::vector<Student> database;
     std::streambuf* originalCin = std::cin.rdbuf();
+    
     std::stringstream input;
-    input << "Иван Иванов\n20\nИнформатика\n4.5\n";
+    input << "Иван Иванов\n";    // имя + \n
+    input << "20\n";             // возраст + \n  
+    input << "Информатика\n";    // специальность + \n
+    input << "4.5\n";            // GPA + \n
+    
     std::cin.rdbuf(input.rdbuf());
     addStudent(database);
     std::cin.rdbuf(originalCin);
+    
     ASSERT_EQ(database.size(), 1);
     EXPECT_EQ(database[0].name, "Иван Иванов");
     EXPECT_EQ(database[0].age, 20);
