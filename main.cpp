@@ -1,6 +1,8 @@
 #include <iostream>
 #include <vector>
 #include <string>
+#include <fstream>
+#include <sstream>
 //структура студента
 struct Student {
     std::string name;
@@ -8,6 +10,25 @@ struct Student {
     std::string major;
     double gpa;
 };
+// функүиә для чтения  из файла
+void loadStudents(std::vector<Student>& database, const std::string& filename) {
+    std::ifstream file(filename); // Исправлено: использование filename
+    if (!file.is_open()) {
+        std::cout << "не удалось открыть файл " << filename << "\n";
+        return;
+    }
+
+    std::string line;
+    while (std::getline(file, line)) {
+        std::istringstream iss(line);
+        Student student;
+        if (iss >> student.name >> student.age >> student.major >> student.gpa) {
+            database.push_back(student);
+        } else {
+            std::cout << "ошибка чтения " << line << "\n";
+        }
+    }
+}
 //функүиә добавлениә студента в бд
 void addStudent(std::vector<Student>& database) {
     Student student;
@@ -77,7 +98,7 @@ void searcSpecс(const std::vector<Student>& database) {
 }
 int main() {
     std::vector<Student> database;
-
+    loadStudents(database, "bd.txt"); // Указываем имя файла здесь
     int choice;
     do {
         std::cout << "Меню:\n";
