@@ -142,7 +142,7 @@ int main(int argc, char **argv) {
                 ::testing::InitGoogleTest(&argc, argv);
                 return RUN_ALL_TESTS();
             case 0:
-                std::cout << "Выход из программы.\n";
+                std::cout << "Выход\n";
                 break;
             default:
                 std::cout << "Неверный выбор. Попробуйте снова.\n";
