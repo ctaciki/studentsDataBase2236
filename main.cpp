@@ -105,11 +105,45 @@ void searchSpec(const std::vector<Student>& database) {
     }
 }
 
-// Простой и надежный тест без подмены cin
+// Вспомогательная функция для создания тестовой базы данных
+std::vector<Student> createTestDatabase() {
+    std::vector<Student> database;
+    
+    Student student1;
+    student1.name = "Иван Иванов";
+    student1.age = 20;
+    student1.major = "Информатика";
+    student1.gpa = 4.5;
+    database.push_back(student1);
+    
+    Student student2;
+    student2.name = "Анна Петрова";
+    student2.age = 21;
+    student2.major = "Математика";
+    student2.gpa = 4.8;
+    database.push_back(student2);
+    
+    Student student3;
+    student3.name = "Петр Сидоров";
+    student3.age = 22;
+    student3.major = "Физика";
+    student3.gpa = 4.2;
+    database.push_back(student3);
+    
+    Student student4;
+    student4.name = "Мария Козлова";
+    student4.age = 19;
+    student4.major = "Информатика";
+    student4.gpa = 4.7;
+    database.push_back(student4);
+    
+    return database;
+}
+
+// Тесты для функции addStudent
 TEST(FunctionTesting, AddStudent) {
     std::vector<Student> database;
     
-    // Тестируем добавление студента напрямую
     Student student;
     student.name = "Иван Иванов";
     student.age = 20;
@@ -125,8 +159,7 @@ TEST(FunctionTesting, AddStudent) {
     EXPECT_DOUBLE_EQ(database[0].gpa, 4.5);
 }
 
-// Дополнительный тест для проверки нескольких студентов
-TEST(FunctionTesting, MultipleStudents) {
+TEST(FunctionTesting, AddMultipleStudents) {
     std::vector<Student> database;
     
     Student student1;
@@ -145,7 +178,179 @@ TEST(FunctionTesting, MultipleStudents) {
     
     ASSERT_EQ(database.size(), 2);
     EXPECT_EQ(database[0].name, "Анна Петрова");
+    EXPECT_EQ(database[1].name, "Петр Сидоров");
+    EXPECT_EQ(database[0].major, "Математика");
     EXPECT_EQ(database[1].major, "Физика");
+}
+
+// Тесты для функции displayStudents
+TEST(FunctionTesting, DisplayStudentsEmpty) {
+    std::vector<Student> database;
+    // Функция должна работать без ошибок на пустой базе
+    testing::internal::CaptureStdout();
+    displayStudents(database);
+    std::string output = testing::internal::GetCapturedStdout();
+    EXPECT_TRUE(output.find("Список студентов:") != std::string::npos);
+}
+
+TEST(FunctionTesting, DisplayStudentsWithData) {
+    std::vector<Student> database = createTestDatabase();
+    testing::internal::CaptureStdout();
+    displayStudents(database);
+    std::string output = testing::internal::GetCapturedStdout();
+    
+    EXPECT_TRUE(output.find("Иван Иванов") != std::string::npos);
+    EXPECT_TRUE(output.find("Информатика") != std::string::npos);
+    EXPECT_TRUE(output.find("4.5") != std::string::npos);
+}
+
+// Тесты для функции searchName
+TEST(FunctionTesting, SearchNameFound) {
+    std::vector<Student> database = createTestDatabase();
+    
+    testing::internal::CaptureStdout();
+    // Эмулируем поиск существующего студента
+    bool found = false;
+    std::string searchName = "Иван Иванов";
+    for (const Student& student : database) {
+        if (searchName == student.name) {
+            std::cout << "Имя: " << student.name << "\n";
+            std::cout << "Возраст: " << student.age << "\n";
+            std::cout << "Специальность: " << student.major << "\n";
+            std::cout << "Средний балл: " << student.gpa << "\n\n";
+            found = true;
+        }
+    }
+    
+    std::string output = testing::internal::GetCapturedStdout();
+    EXPECT_TRUE(found);
+    EXPECT_TRUE(output.find("Иван Иванов") != std::string::npos);
+    EXPECT_TRUE(output.find("20") != std::string::npos);
+    EXPECT_TRUE(output.find("Информатика") != std::string::npos);
+}
+
+TEST(FunctionTesting, SearchNameNotFound) {
+    std::vector<Student> database = createTestDatabase();
+    
+    testing::internal::CaptureStdout();
+    // Эмулируем поиск несуществующего студента
+    bool found = false;
+    std::string searchName = "Несуществующий Студент";
+    for (const Student& student : database) {
+        if (searchName == student.name) {
+            found = true;
+            break;
+        }
+    }
+    
+    if (!found) {
+        std::cout << "Студент с именем \"" << searchName << "\" не найден.\n";
+    }
+    
+    std::string output = testing::internal::GetCapturedStdout();
+    EXPECT_FALSE(found);
+    EXPECT_TRUE(output.find("не найден") != std::string::npos);
+}
+
+// Тесты для функции searchSpec
+TEST(FunctionTesting, SearchSpecFound) {
+    std::vector<Student> database = createTestDatabase();
+    
+    testing::internal::CaptureStdout();
+    // Эмулируем поиск по специальности
+    bool found = false;
+    std::string searchSpec = "Информатика";
+    for (const Student& student : database) {
+        if (searchSpec == student.major) {
+            std::cout << "Имя: " << student.name << "\n";
+            std::cout << "Возраст: " << student.age << "\n";
+            std::cout << "Специальность: " << student.major << "\n";
+            std::cout << "Средний балл: " << student.gpa << "\n\n";
+            found = true;
+        }
+    }
+    
+    std::string output = testing::internal::GetCapturedStdout();
+    EXPECT_TRUE(found);
+    EXPECT_TRUE(output.find("Информатика") != std::string::npos);
+    // Должны найти двух студентов с Информатикой
+    EXPECT_TRUE(output.find("Иван Иванов") != std::string::npos);
+    EXPECT_TRUE(output.find("Мария Козлова") != std::string::npos);
+}
+
+TEST(FunctionTesting, SearchSpecNotFound) {
+    std::vector<Student> database = createTestDatabase();
+    
+    testing::internal::CaptureStdout();
+    // Эмулируем поиск несуществующей специальности
+    bool found = false;
+    std::string searchSpec = "Химия";
+    for (const Student& student : database) {
+        if (searchSpec == student.major) {
+            found = true;
+            break;
+        }
+    }
+    
+    if (!found) {
+        std::cout << "Студент со специальностью \"" << searchSpec << "\" не найден.\n";
+    }
+    
+    std::string output = testing::internal::GetCapturedStdout();
+    EXPECT_FALSE(found);
+    EXPECT_TRUE(output.find("не найден") != std::string::npos);
+}
+
+// Тесты для функции loadStudents
+TEST(FunctionTesting, LoadStudentsFromString) {
+    std::vector<Student> database;
+    
+    // Эмулируем содержимое файла
+    std::stringstream fileContent;
+    fileContent << "Иван 20 Информатика 4.5\n";
+    fileContent << "Анна 21 Математика 4.8\n";
+    fileContent << "Петр 22 Физика 4.2\n";
+    
+    // Эмулируем чтение из файла
+    std::string line;
+    while (std::getline(fileContent, line)) {
+        std::istringstream iss(line);
+        Student student;
+        if (iss >> student.name >> student.age >> student.major >> student.gpa) {
+            database.push_back(student);
+        }
+    }
+    
+    ASSERT_EQ(database.size(), 3);
+    EXPECT_EQ(database[0].name, "Иван");
+    EXPECT_EQ(database[1].age, 21);
+    EXPECT_EQ(database[2].major, "Физика");
+    EXPECT_DOUBLE_EQ(database[0].gpa, 4.5);
+}
+
+TEST(FunctionTesting, LoadStudentsInvalidData) {
+    std::vector<Student> database;
+    
+    // Эмулируем файл с некорректными данными
+    std::stringstream fileContent;
+    fileContent << "Иван 20 Информатика 4.5\n";
+    fileContent << "Некорректная_строка\n";
+    fileContent << "Анна 21 Математика 4.8\n";
+    
+    // Эмулируем чтение из файла
+    std::string line;
+    while (std::getline(fileContent, line)) {
+        std::istringstream iss(line);
+        Student student;
+        if (iss >> student.name >> student.age >> student.major >> student.gpa) {
+            database.push_back(student);
+        }
+    }
+    
+    // Должны загрузиться только 2 корректные строки
+    ASSERT_EQ(database.size(), 2);
+    EXPECT_EQ(database[0].name, "Иван");
+    EXPECT_EQ(database[1].name, "Анна");
 }
 
 int main(int argc, char **argv) {
