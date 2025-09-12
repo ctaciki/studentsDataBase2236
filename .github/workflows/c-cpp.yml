@@ -12,36 +12,37 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
-      
+
     - name: Install dependencies
-      run: sudo apt-get update && sudo apt-get install -y libgtest-dev build-essential cmake gcovr lcov
-      
+      run: sudo apt-get update && sudo apt-get install -y libgtest-dev build-essential cmake gcovr
+
     - name: Build Google Test
       run: |
         cd /usr/src/googletest
         sudo cmake -S . -B build
         sudo cmake --build build
         sudo cp build/lib/lib*.a /usr/lib
-      
+
     - name: Compile with coverage
       run: g++ -std=c++14 -O0 -fprofile-arcs -ftest-coverage main.cpp -lgtest -lgtest_main -pthread -o test_program
-      
+
     - name: Run tests
-      run: ./test_program --run-tests
-      
-    - name: Generate coverage report
+      run: ./test_program   # без --run-tests, иначе gcda может не писаться
+
+    - name: Generate coverage report (gcovr)
       run: |
-        lcov --capture --directory . --output-file coverage.info --rc geninfo_unexecuted_blocks=1 --ignore-errors mismatch || true
-        lcov --remove coverage.info '/usr/*' '*/gtest*' --output-file coverage.info || true
-        lcov --list coverage.info || echo "Coverage report generation failed, proceeding with default value"
-        
+        gcovr -r . --xml-pretty --output coverage.xml
+        gcovr -r . --txt --output coverage.txt
+        gcovr -r . --json-summary-pretty --output coverage.json
+        cat coverage.txt
+
     - name: Extract coverage percentage
       id: coverage
       run: |
-        PERCENT=$(lcov --list coverage.info 2>/dev/null | grep "lines" | awk '{print $2}' | sed 's/%//' | head -1 || echo "0")
+        PERCENT=$(gcovr -r . --json-summary | jq '.line_percent' | xargs printf "%.0f")
         if [ -z "$PERCENT" ]; then PERCENT="0"; fi
         echo "COVERAGE=$PERCENT" >> $GITHUB_ENV
-        
+
     - name: Create badge in gist
       uses: schneegans/dynamic-badges-action@v1.7.0
       with:
