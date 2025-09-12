@@ -33,7 +33,7 @@ jobs:
       run: |
         lcov --capture --directory . --output-file coverage.info
         lcov --remove coverage.info '/usr/*' '*/gtest*' --output-file coverage.info
-        lcov --list coverage.info  # Проверка процента в логах
+        lcov --list coverage.info
     
     - name: Extract coverage percentage
       id: coverage
@@ -45,16 +45,17 @@ jobs:
       uses: schneegans/dynamic-badges-action@v1.8.0
       with:
         auth: ${{ secrets.GITHUB_TOKEN }}
-        gistID: ${{ secrets.GIST_ID }}  
         filename: test-coverage.json
         label: Test Coverage
         message: ${{ env.COVERAGE }}%
-        color: pink  
-        style: plastic  
+        color: pink
+        style: plastic
     
-    - name: Deploy to GitHub Pages (для бейджа)
+    - name: Commit badge to repository (if on main)
       if: github.ref == 'refs/heads/main'
-      uses: peaceiris/actions-gh-pages@v3
-      with:
-        github_token: ${{ secrets.GITHUB_TOKEN }}
-        publish_dir: ./.github/badges
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        git add coverage.svg
+        git commit -m "Update test coverage badge" || echo "No changes to commit"
+        git push
