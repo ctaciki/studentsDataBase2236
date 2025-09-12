@@ -45,13 +45,13 @@ jobs:
     - name: Create badge
       uses: schneegans/dynamic-badges-action@v1.7.0
       with:
-        auth: ${{ secrets.GITHUB_TOKEN }}  # Аутентификация для коммита
-        filename: coverage.svg  # Прямой вывод SVG вместо JSON для Gist
+        auth: ${{ secrets.GITHUB_TOKEN }}  # Для коммита в репозиторий
+        filename: coverage.svg  # Прямой вывод SVG
         label: Test Coverage
         message: ${{ env.COVERAGE }}%
         color: green
         style: plastic
-        # Убраны gistID и связанные параметры, так как не нужны
+        # Убраны gistID и другие параметры Gist
       
     - name: Commit badge to repository (if on main)
       if: github.ref == 'refs/heads/main'
