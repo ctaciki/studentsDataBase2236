@@ -34,30 +34,31 @@ jobs:
         lcov --capture --directory . --output-file coverage.info --rc geninfo_unexecuted_blocks=1 --ignore-errors mismatch || true
         lcov --remove coverage.info '/usr/*' '*/gtest*' --output-file coverage.info || true
         lcov --list coverage.info || echo "Coverage report generation failed, proceeding with default value"
-      
+        
     - name: Extract coverage percentage
       id: coverage
       run: |
         PERCENT=$(lcov --list coverage.info 2>/dev/null | grep "lines" | awk '{print $2}' | sed 's/%//' | head -1 || echo "0")
         if [ -z "$PERCENT" ]; then PERCENT="0"; fi
         echo "COVERAGE=$PERCENT" >> $GITHUB_ENV
-      
+        
     - name: Create badge
       uses: schneegans/dynamic-badges-action@v1.7.0
       with:
-        auth: ${{ secrets.GITHUB_TOKEN }}  # Для коммита в репозиторий
-        filename: coverage.svg  # Прямой вывод SVG
+        auth: ${{ secrets.GIST_SECRET }}
+        gistID: <56ceb89e202d8eb2b4d499bd8b387c46> 
+        filename: coverage.json
         label: Test Coverage
         message: ${{ env.COVERAGE }}%
         color: green
-        style: plastic
-        # Убраны gistID и другие параметры Gist
-      
-    - name: Commit badge to repository (if on main)
+        style: plastic 
+  
+        
+    - name: Commit badge to repository (if on main)  
       if: github.ref == 'refs/heads/main'
       run: |
         git config --local user.email "action@github.com"
         git config --local user.name "GitHub Action"
-        git add coverage.svg
+        git add coverage.svg  # Если используете SVG-режим
         git commit -m "Update test coverage badge [skip ci]" || echo "No changes to commit"
         git push
