@@ -11,7 +11,8 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v3
+    - name: Checkout repository
+      uses: actions/checkout@v3
 
     - name: Install dependencies
       run: |
@@ -27,28 +28,27 @@ jobs:
 
     - name: Build project with coverage
       run: |
-        g++ -fprofile-arcs -ftest-coverage -std=c++17 main.cpp -I/usr/include/gtest -lgtest -lgtest_main -pthread -o prog
+        g++ -fprofile-arcs -ftest-coverage -std=c++17 main.cpp \
+            -I/usr/include/gtest -lgtest -lgtest_main -pthread -o prog
 
     - name: Run tests
       run: ./prog --run-tests
 
-    - name: Generate coverage report
+    - name: Generate coverage
       run: |
         # Генерация coverage
         lcov --capture --directory . --output-file coverage.info --ignore-errors mismatch
-        # Удаляем системные файлы
         lcov --remove coverage.info '/usr/*' --output-file coverage.info
-        # Выводим coverage
         lcov --list coverage.info
-        # Сохраняем процент покрытия
+        # Извлечение процента покрытия
         PERCENT=$(lcov --list coverage.info | grep "lines" | awk '{print $2}' | sed 's/%//' | head -1)
         echo "COVERAGE=${PERCENT:-0}" >> $GITHUB_ENV
 
     - name: Create coverage badge
       uses: schneegans/dynamic-badges-action@v1.7.0
       with:
-        auth: ${{ secrets.GIST_SECRET }}
-        gistID: 56ceb89e202d8eb2b4d499bd8b387c46      # <-- вставьте сюда свой Gist ID
+        auth: ${{ secrets.GIST_SECRET }}       # GitHub PAT с правом на Gist
+        gistID: 56ceb89e202d8eb2b4d499bd8b387c46                  # вставьте свой Gist ID
         filename: coverage.json
         label: Coverage
         message: ${{ env.COVERAGE }}%
