@@ -36,11 +36,13 @@ jobs:
 
     - name: Generate coverage
       run: |
-        # Генерация coverage
+        # Создаём coverage info
         lcov --capture --directory . --output-file coverage.info --ignore-errors mismatch
+        # Убираем системные файлы
         lcov --remove coverage.info '/usr/*' --output-file coverage.info
+        # Печатаем summary
         lcov --list coverage.info
-        # Извлечение процента покрытия
+        # Извлекаем процент покрытия
         PERCENT=$(lcov --list coverage.info | grep "lines" | awk '{print $2}' | sed 's/%//' | head -1)
         echo "COVERAGE=${PERCENT:-0}" >> $GITHUB_ENV
 
@@ -48,7 +50,7 @@ jobs:
       uses: schneegans/dynamic-badges-action@v1.7.0
       with:
         auth: ${{ secrets.GIST_SECRET }}       # GitHub PAT с правом на Gist
-        gistID: 56ceb89e202d8eb2b4d499bd8b387c46                  # вставьте свой Gist ID
+        gistID: 56ceb89e202d8eb2b4d499bd8b387c46              # <-- вставьте свой Gist ID
         filename: coverage.json
         label: Coverage
         message: ${{ env.COVERAGE }}%
