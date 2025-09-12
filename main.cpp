@@ -120,7 +120,6 @@ std::vector<Student> createTestDatabase() {
 }
 
 // ------------------ ТЕСТЫ ------------------
-
 TEST(FunctionTesting, AddStudent) {
     std::vector<Student> database;
     database.push_back({"Иван Иванов", 20, "Информатика", 4.5});
@@ -172,7 +171,6 @@ TEST(FunctionTesting, SearchSpecNotFound) {
 }
 
 // ------------------ MAIN ------------------
-
 int main(int argc, char **argv) {
     if (argc > 1 && std::string(argv[1]) == "--run-tests") {
         ::testing::InitGoogleTest(&argc, argv);
