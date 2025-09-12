@@ -25,7 +25,6 @@ jobs:
       
     - name: Compile with coverage
       run: g++ -std=c++14 -O0 -fprofile-arcs -ftest-coverage main.cpp -lgtest -lgtest_main -pthread -o test_program
-      # Добавлен -O0 для отключения оптимизаций, что улучшит точность покрытия
       
     - name: Run tests
       run: ./test_program --run-tests
@@ -46,12 +45,13 @@ jobs:
     - name: Create badge
       uses: schneegans/dynamic-badges-action@v1.7.0
       with:
-        auth: ${{ secrets.GITHUB_TOKEN }}
-        filename: test-coverage.json
+        auth: ${{ secrets.GITHUB_TOKEN }}  # Аутентификация для коммита
+        filename: coverage.svg  # Прямой вывод SVG вместо JSON для Gist
         label: Test Coverage
         message: ${{ env.COVERAGE }}%
         color: green
         style: plastic
+        # Убраны gistID и связанные параметры, так как не нужны
       
     - name: Commit badge to repository (if on main)
       if: github.ref == 'refs/heads/main'
