@@ -1,3 +1,3 @@
 ![Static Badge](https://img.shields.io/badge/meow-pink)
 
-![CI](https://github.com/ctaciki/studentsDataBase2236/actions/workflows/c-cpp.yml/badge.svg)
+![Coverage](https://gist.githubusercontent.com/ctaciki/56ceb89e202d8eb2b4d499bd8b387c46/raw/coverage.json)
