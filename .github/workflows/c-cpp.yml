@@ -42,9 +42,9 @@ jobs:
         echo "COVERAGE=$PERCENT" >> $GITHUB_ENV
       
     - name: Create badge
-      uses: schneegans/dynamic-badges-action@v1.7.1  
+      uses: schneegans/dynamic-badges-action@v1.7.0  # Исправлено на v1.7.0
       with:
-        auth: ${{ secrets.GITHUB_TOKEN }} 
+        auth: ${{ secrets.GITHUB_TOKEN }}  # Аутентификация через токен
         filename: test-coverage.json
         label: Test Coverage
         message: ${{ env.COVERAGE }}%
