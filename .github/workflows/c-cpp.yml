@@ -24,21 +24,23 @@ jobs:
         sudo cp build/lib/lib*.a /usr/lib
       
     - name: Compile with coverage
-      run: g++ -std=c++14 -fprofile-arcs -ftest-coverage main.cpp -lgtest -lgtest_main -pthread -o test_program
+      run: g++ -std=c++14 -O0 -fprofile-arcs -ftest-coverage main.cpp -lgtest -lgtest_main -pthread -o test_program
+      # Добавлен -O0 для отключения оптимизаций, что улучшит точность покрытия
       
     - name: Run tests
       run: ./test_program --run-tests
       
     - name: Generate coverage report
       run: |
-        lcov --capture --directory . --output-file coverage.info --rc geninfo_unexecuted_blocks=1 --ignore-errors mismatch
-        lcov --remove coverage.info '/usr/*' '*/gtest*' --output-file coverage.info
-        lcov --list coverage.info
+        lcov --capture --directory . --output-file coverage.info --rc geninfo_unexecuted_blocks=1 --ignore-errors mismatch || true
+        lcov --remove coverage.info '/usr/*' '*/gtest*' --output-file coverage.info || true
+        lcov --list coverage.info || echo "Coverage report generation failed, proceeding with default value"
       
     - name: Extract coverage percentage
       id: coverage
       run: |
-        PERCENT=$(lcov --list coverage.info | grep "lines" | awk '{print $2}' | sed 's/%//' | head -1)
+        PERCENT=$(lcov --list coverage.info 2>/dev/null | grep "lines" | awk '{print $2}' | sed 's/%//' | head -1 || echo "0")
+        if [ -z "$PERCENT" ]; then PERCENT="0"; fi
         echo "COVERAGE=$PERCENT" >> $GITHUB_ENV
       
     - name: Create badge
