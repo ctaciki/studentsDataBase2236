@@ -12,50 +12,50 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
-    
+      
     - name: Install dependencies
       run: sudo apt-get update && sudo apt-get install -y libgtest-dev build-essential cmake gcovr lcov
-    
+      
     - name: Build Google Test
       run: |
         cd /usr/src/googletest
         sudo cmake -S . -B build
         sudo cmake --build build
         sudo cp build/lib/lib*.a /usr/lib
-    
+      
     - name: Compile with coverage
       run: g++ -std=c++14 -fprofile-arcs -ftest-coverage main.cpp -lgtest -lgtest_main -pthread -o test_program
-    
+      
     - name: Run tests
       run: ./test_program --run-tests
-    
+      
     - name: Generate coverage report
       run: |
         lcov --capture --directory . --output-file coverage.info
         lcov --remove coverage.info '/usr/*' '*/gtest*' --output-file coverage.info
         lcov --list coverage.info
-    
+      
     - name: Extract coverage percentage
       id: coverage
       run: |
         PERCENT=$(lcov --list coverage.info | grep "lines" | awk '{print $2}' | sed 's/%//' | head -1)
         echo "COVERAGE=$PERCENT" >> $GITHUB_ENV
-    
+      
     - name: Create badge
-      uses: schneegans/dynamic-badges-action@v1.8.0
+      uses: schneegans/dynamic-badges-action@v1.7.1  
       with:
-        auth: ${{ secrets.GITHUB_TOKEN }}
+        auth: ${{ secrets.GITHUB_TOKEN }} 
         filename: test-coverage.json
         label: Test Coverage
         message: ${{ env.COVERAGE }}%
-        color: pink
+        color: green
         style: plastic
-    
+      
     - name: Commit badge to repository (if on main)
       if: github.ref == 'refs/heads/main'
       run: |
         git config --local user.email "action@github.com"
         git config --local user.name "GitHub Action"
         git add coverage.svg
-        git commit -m "Update test coverage badge" || echo "No changes to commit"
+        git commit -m "Update test coverage badge [skip ci]" || echo "No changes to commit"
         git push
