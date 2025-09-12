@@ -42,23 +42,13 @@ jobs:
         if [ -z "$PERCENT" ]; then PERCENT="0"; fi
         echo "COVERAGE=$PERCENT" >> $GITHUB_ENV
         
-    - name: Create badge
+    - name: Create badge in gist
       uses: schneegans/dynamic-badges-action@v1.7.0
       with:
-        auth: ${{ secrets.GIST_SECRET }}
-        gistID: 56ceb89e202d8eb2b4d499bd8b387c46
+        auth: ${{ secrets.GIST_SECRET }}        # токен с правами gist
+        gistID: 56ceb89e202d8eb2b4d499bd8b387c46 # ваш gist ID
         filename: coverage.json
         label: Test Coverage
         message: ${{ env.COVERAGE }}%
         color: green
-        style: plastic 
-  
-        
-    - name: Commit badge to repository (if on main)  
-      if: github.ref == 'refs/heads/main'
-      run: |
-        git config --local user.email "action@github.com"
-        git config --local user.name "GitHub Action"
-        git add coverage.svg  # Если используете SVG-режим
-        git commit -m "Update test coverage badge [skip ci]" || echo "No changes to commit"
-        git push
+        style: plastic
