@@ -31,7 +31,7 @@ jobs:
       
     - name: Generate coverage report
       run: |
-        lcov --capture --directory . --output-file coverage.info
+        lcov --capture --directory . --output-file coverage.info --rc geninfo_unexecuted_blocks=1 --ignore-errors mismatch
         lcov --remove coverage.info '/usr/*' '*/gtest*' --output-file coverage.info
         lcov --list coverage.info
       
@@ -42,9 +42,9 @@ jobs:
         echo "COVERAGE=$PERCENT" >> $GITHUB_ENV
       
     - name: Create badge
-      uses: schneegans/dynamic-badges-action@v1.7.0  # Исправлено на v1.7.0
+      uses: schneegans/dynamic-badges-action@v1.7.0
       with:
-        auth: ${{ secrets.GITHUB_TOKEN }}  # Аутентификация через токен
+        auth: ${{ secrets.GITHUB_TOKEN }}
         filename: test-coverage.json
         label: Test Coverage
         message: ${{ env.COVERAGE }}%
