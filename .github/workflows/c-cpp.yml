@@ -1,4 +1,4 @@
-name: C++ CI
+name: C/C++ CI
 
 on:
   push:
@@ -7,7 +7,7 @@ on:
     branches: [ "main" ]
 
 jobs:
-  build:
+  build-and-test:
     runs-on: ubuntu-latest
 
     steps:
@@ -35,6 +35,23 @@ jobs:
 
     - name: Generate coverage
       run: |
+        # Удаляем старые файлы gcda
+        find . -name "*.gcda" -delete || true
+        # Генерируем coverage, игнорируем ошибки mismatch
         lcov --capture --directory . --output-file coverage.info --ignore-errors mismatch
         lcov --remove coverage.info '/usr/*' --output-file coverage.info
         lcov --list coverage.info
+        # Сохраняем процент покрытия в переменную
+        PERCENT=$(lcov --list coverage.info | grep "lines" | awk '{print $2}' | sed 's/%//' | head -1)
+        echo "COVERAGE=${PERCENT:-0}" >> $GITHUB_ENV
+
+    - name: Create coverage badge
+      uses: schneegans/dynamic-badges-action@v1.7.0
+      with:
+        auth: ${{ secrets.GIST_SECRET }}
+        gistID: <ТВОЙ_GIST_ID>    # замените на свой Gist
+        filename: coverage.json
+        label: Coverage
+        message: ${{ env.COVERAGE }}%
+        color: green
+        style: plastic
