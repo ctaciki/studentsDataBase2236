@@ -1,3 +1,3 @@
 ![Static Badge](https://img.shields.io/badge/meow-pink)
 
-[![Test Coverage](https://raw.githubusercontent.com/ctaciki/studentsDataBase2236/main/coverage.svg)](https://github.com/ctaciki/studentsDataBase2236/actions)
+![Coverage](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/<ваш-юзер>/<gistID>/raw/coverage.json)
