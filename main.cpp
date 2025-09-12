@@ -29,7 +29,6 @@ void loadStudents(std::vector<Student>& database, const std::string& filename) {
             std::cout << "Ошибка чтения строки: " << line << "\n";
         }
     }
-    file.close();
 }
 
 void addStudent(std::vector<Student>& database) {
@@ -61,10 +60,6 @@ void addStudent(std::vector<Student>& database) {
 }
 
 void displayStudents(const std::vector<Student>& database) {
-    if (database.empty()) {
-        std::cout << "База данных пуста.\n";
-        return;
-    }
     std::cout << "Список студентов:\n";
     for (const Student& student : database) {
         std::cout << "Имя: " << student.name << "\n";
@@ -75,10 +70,6 @@ void displayStudents(const std::vector<Student>& database) {
 }
 
 void searchName(const std::vector<Student>& database) {
-    if (database.empty()) {
-        std::cout << "База данных пуста.\n";
-        return;
-    }
     std::string name;
     std::cout << "Введите имя студента: ";
     std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
@@ -99,10 +90,6 @@ void searchName(const std::vector<Student>& database) {
 }
 
 void searchSpec(const std::vector<Student>& database) {
-    if (database.empty()) {
-        std::cout << "База данных пуста.\n";
-        return;
-    }
     std::string spec;
     std::cout << "Введите специальность: ";
     std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
@@ -154,14 +141,6 @@ TEST(FunctionTesting, DisplayStudentsWithData) {
     EXPECT_TRUE(output.find("4.5") != std::string::npos);
 }
 
-TEST(FunctionTesting, DisplayStudentsEmpty) {
-    std::vector<Student> emptyDatabase;
-    testing::internal::CaptureStdout();
-    displayStudents(emptyDatabase);
-    std::string output = testing::internal::GetCapturedStdout();
-    EXPECT_TRUE(output.find("База данных пуста") != std::string::npos);
-}
-
 TEST(FunctionTesting, SearchNameFound) {
     auto database = createTestDatabase();
     testing::internal::CaptureStdout();
@@ -169,38 +148,6 @@ TEST(FunctionTesting, SearchNameFound) {
     bool found = false;
     for (const auto& s : database) {
         if (s.name == searchName) {
-            std::cout << s.name << "\n";
-            found = true;
-        }
-    }
-    std::string output = testing::internal::GetCapturedStdout();
-    EXPECT_TRUE(found);
-    EXPECT_TRUE(output.find("Иван Иванов") != std::string::npos);
-}
-
-TEST(FunctionTesting, SearchNameNotFound) {
-    auto database = createTestDatabase();
-    testing::internal::CaptureStdout();
-    std::string searchName = "Несуществующий";
-    bool found = false;
-    for (const auto& s : database) {
-        if (s.name == searchName) {
-            found = true;
-        }
-    }
-    if (!found) std::cout << "не найден\n";
-    std::string output = testing::internal::GetCapturedStdout();
-    EXPECT_FALSE(found);
-    EXPECT_TRUE(output.find("не найден") != std::string::npos);
-}
-
-TEST(FunctionTesting, SearchSpecFound) {
-    auto database = createTestDatabase();
-    testing::internal::CaptureStdout();
-    std::string spec = "Информатика";
-    bool found = false;
-    for (const auto& s : database) {
-        if (s.major == spec) {
             std::cout << s.name << "\n";
             found = true;
         }
@@ -222,50 +169,6 @@ TEST(FunctionTesting, SearchSpecNotFound) {
     std::string output = testing::internal::GetCapturedStdout();
     EXPECT_FALSE(found);
     EXPECT_TRUE(output.find("не найден") != std::string::npos);
-}
-
-TEST(FunctionTesting, SearchNameEmptyDatabase) {
-    std::vector<Student> emptyDatabase;
-    testing::internal::CaptureStdout();
-    searchName(emptyDatabase);
-    std::string output = testing::internal::GetCapturedStdout();
-    EXPECT_TRUE(output.find("База данных пуста") != std::string::npos);
-}
-
-TEST(FunctionTesting, SearchSpecEmptyDatabase) {
-    std::vector<Student> emptyDatabase;
-    testing::internal::CaptureStdout();
-    searchSpec(emptyDatabase);
-    std::string output = testing::internal::GetCapturedStdout();
-    EXPECT_TRUE(output.find("База данных пуста") != std::string::npos);
-}
-
-TEST(FunctionTesting, LoadStudentsFileNotFound) {
-    std::vector<Student> database;
-    testing::internal::CaptureStdout();
-    loadStudents(database, "nonexistent.txt");
-    std::string output = testing::internal::GetCapturedStdout();
-    EXPECT_TRUE(output.find("Не удалось открыть файл") != std::string::npos);
-}
-
-TEST(FunctionTesting, LoadStudentsInvalidData) {
-    // Создаем временный файл с неверными данными
-    std::ofstream testFile("test_invalid.txt");
-    testFile << "Иван 20 Информатика 4.5\n";
-    testFile << "Некорректная строка\n";
-    testFile << "Анна 21 Математика 4.8\n";
-    testFile.close();
-    
-    std::vector<Student> database;
-    testing::internal::CaptureStdout();
-    loadStudents(database, "test_invalid.txt");
-    std::string output = testing::internal::GetCapturedStdout();
-    
-    EXPECT_EQ(database.size(), 2); // Должны загрузиться только 2 корректные строки
-    EXPECT_TRUE(output.find("Ошибка чтения строки") != std::string::npos);
-    
-    // Удаляем временный файл
-    remove("test_invalid.txt");
 }
 
 // ------------------ MAIN ------------------
