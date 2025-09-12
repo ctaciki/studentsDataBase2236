@@ -1,4 +1,4 @@
-name: C/C++ CI
+name: C++ CI
 
 on:
   push:
@@ -14,42 +14,23 @@ jobs:
     - uses: actions/checkout@v3
 
     - name: Install dependencies
-      run: sudo apt-get update && sudo apt-get install -y libgtest-dev build-essential cmake gcovr
+      run: sudo apt-get update && sudo apt-get install -y g++ cmake lcov
 
-    - name: Build Google Test
+    - name: Build
       run: |
-        cd /usr/src/googletest
-        sudo cmake -S . -B build
-        sudo cmake --build build
-        sudo cp build/lib/lib*.a /usr/lib
-
-    - name: Compile with coverage
-      run: g++ -std=c++14 -O0 -fprofile-arcs -ftest-coverage main.cpp -lgtest -lgtest_main -pthread -o test_program
+        g++ -fprofile-arcs -ftest-coverage -std=c++17 main.cpp -lgtest -lgtest_main -pthread -o prog
 
     - name: Run tests
-      run: ./test_program   # без --run-tests, иначе gcda может не писаться
+      run: ./prog --run-tests
 
-    - name: Generate coverage report (gcovr)
+    - name: Generate coverage
       run: |
-        gcovr -r . --xml-pretty --output coverage.xml
-        gcovr -r . --txt --output coverage.txt
-        gcovr -r . --json-summary-pretty --output coverage.json
-        cat coverage.txt
+        lcov --capture --directory . --output-file coverage.info
+        lcov --remove coverage.info '/usr/*' --output-file coverage.info
+        lcov --list coverage.info
 
-    - name: Extract coverage percentage
-      id: coverage
-      run: |
-        PERCENT=$(gcovr -r . --json-summary | jq '.line_percent' | xargs printf "%.0f")
-        if [ -z "$PERCENT" ]; then PERCENT="0"; fi
-        echo "COVERAGE=$PERCENT" >> $GITHUB_ENV
-
-    - name: Create badge in gist
-      uses: schneegans/dynamic-badges-action@v1.7.0
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v3
       with:
-        auth: ${{ secrets.GIST_SECRET }}        # токен с правами gist
-        gistID: 56ceb89e202d8eb2b4d499bd8b387c46 # ваш gist ID
-        filename: coverage.json
-        label: Test Coverage
-        message: ${{ env.COVERAGE }}%
-        color: green
-        style: plastic
+        files: coverage.info
+        fail_ci_if_error: true
