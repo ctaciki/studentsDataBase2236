@@ -25,23 +25,22 @@ jobs:
         sudo cmake --build build
         sudo cp build/lib/lib*.a /usr/lib
 
-    - name: Build project
+    - name: Build project with coverage
       run: |
-        g++ -fprofile-arcs -ftest-coverage -std=c++17 \
-            -I/usr/include/gtest main.cpp -lgtest -lgtest_main -pthread -o prog
+        g++ -fprofile-arcs -ftest-coverage -std=c++17 main.cpp -I/usr/include/gtest -lgtest -lgtest_main -pthread -o prog
 
     - name: Run tests
       run: ./prog --run-tests
 
-    - name: Generate coverage
+    - name: Generate coverage report
       run: |
-        # Удаляем старые файлы gcda
-        find . -name "*.gcda" -delete || true
-        # Генерируем coverage, игнорируем ошибки mismatch
+        # Генерация coverage
         lcov --capture --directory . --output-file coverage.info --ignore-errors mismatch
+        # Удаляем системные файлы
         lcov --remove coverage.info '/usr/*' --output-file coverage.info
+        # Выводим coverage
         lcov --list coverage.info
-        # Сохраняем процент покрытия в переменную
+        # Сохраняем процент покрытия
         PERCENT=$(lcov --list coverage.info | grep "lines" | awk '{print $2}' | sed 's/%//' | head -1)
         echo "COVERAGE=${PERCENT:-0}" >> $GITHUB_ENV
 
@@ -49,7 +48,7 @@ jobs:
       uses: schneegans/dynamic-badges-action@v1.7.0
       with:
         auth: ${{ secrets.GIST_SECRET }}
-        gistID: 56ceb89e202d8eb2b4d499bd8b387c46 # замените на свой Gist
+        gistID: 56ceb89e202d8eb2b4d499bd8b387c46      # <-- вставьте сюда свой Gist ID
         filename: coverage.json
         label: Coverage
         message: ${{ env.COVERAGE }}%
