@@ -123,7 +123,7 @@ std::vector<Student> createTestDatabase() {
 TEST(FunctionTesting, AddStudent) {
     std::vector<Student> database;
     std::stringstream input;
-    input << "Иван Иванов\n20\nИнформатика\n4.5\n";
+    input << "\nИван Иванов\n20\nИнформатика\n4.5\n"; // Добавляем начальный \n для первого ignore
     std::streambuf* old_cin = std::cin.rdbuf(input.rdbuf());
     std::stringstream output;
     std::streambuf* old_cout = std::cout.rdbuf(output.rdbuf());
@@ -133,18 +133,18 @@ TEST(FunctionTesting, AddStudent) {
     std::cin.rdbuf(old_cin);
     std::cout.rdbuf(old_cout);
 
-    ASSERT_EQ(database.size(), 1);
-    EXPECT_EQ(database[0].name, "Иван Иванов");
-    EXPECT_EQ(database[0].age, 20);
-    EXPECT_EQ(database[0].major, "Информатика");
-    EXPECT_DOUBLE_EQ(database[0].gpa, 4.5);
-    EXPECT_TRUE(output.str().find("Студент добавлен") != std::string::npos);
+    ASSERT_EQ(database.size(), 1) << "Database size should be 1";
+    EXPECT_EQ(database[0].name, "Иван Иванов") << "Name mismatch";
+    EXPECT_EQ(database[0].age, 20) << "Age mismatch";
+    EXPECT_EQ(database[0].major, "Информатика") << "Major mismatch";
+    EXPECT_DOUBLE_EQ(database[0].gpa, 4.5) << "GPA mismatch";
+    EXPECT_TRUE(output.str().find("Студент добавлен") != std::string::npos) << "Output missing 'Студент добавлен'";
 }
 
 TEST(FunctionTesting, AddStudentInvalidAge) {
     std::vector<Student> database;
     std::stringstream input;
-    input << "Иван Иванов\n-1\n20\nИнформатика\n4.5\n";
+    input << "\nИван Иванов\n-1\n20\nИнформатика\n4.5\n"; // Начальный \n и исправление возраста
     std::streambuf* old_cin = std::cin.rdbuf(input.rdbuf());
     std::stringstream output;
     std::streambuf* old_cout = std::cout.rdbuf(output.rdbuf());
@@ -154,15 +154,15 @@ TEST(FunctionTesting, AddStudentInvalidAge) {
     std::cin.rdbuf(old_cin);
     std::cout.rdbuf(old_cout);
 
-    ASSERT_EQ(database.size(), 1);
-    EXPECT_EQ(database[0].age, 20);
-    EXPECT_TRUE(output.str().find("Неверный возраст") != std::string::npos);
+    ASSERT_EQ(database.size(), 1) << "Database size should be 1";
+    EXPECT_EQ(database[0].age, 20) << "Age should be 20";
+    EXPECT_TRUE(output.str().find("Неверный возраст") != std::string::npos) << "Output missing 'Неверный возраст'";
 }
 
 TEST(FunctionTesting, AddStudentInvalidGPA) {
     std::vector<Student> database;
     std::stringstream input;
-    input << "Иван Иванов\n20\nИнформатика\n6.0\n4.5\n";
+    input << "\nИван Иванов\n20\nИнформатика\n6.0\n4.5\n"; // Начальный \n и исправление GPA
     std::streambuf* old_cin = std::cin.rdbuf(input.rdbuf());
     std::stringstream output;
     std::streambuf* old_cout = std::cout.rdbuf(output.rdbuf());
@@ -172,9 +172,9 @@ TEST(FunctionTesting, AddStudentInvalidGPA) {
     std::cin.rdbuf(old_cin);
     std::cout.rdbuf(old_cout);
 
-    ASSERT_EQ(database.size(), 1);
-    EXPECT_DOUBLE_EQ(database[0].gpa, 4.5);
-    EXPECT_TRUE(output.str().find("Неверный балл") != std::string::npos);
+    ASSERT_EQ(database.size(), 1) << "Database size should be 1";
+    EXPECT_DOUBLE_EQ(database[0].gpa, 4.5) << "GPA should be 4.5";
+    EXPECT_TRUE(output.str().find("Неверный балл") != std::string::npos) << "Output missing 'Неверный балл'";
 }
 
 TEST(FunctionTesting, DisplayStudentsWithData) {
@@ -184,9 +184,9 @@ TEST(FunctionTesting, DisplayStudentsWithData) {
     displayStudents(database);
     std::cout.rdbuf(old_cout);
     std::string output_str = output.str();
-    EXPECT_TRUE(output_str.find("Иван Иванов") != std::string::npos);
-    EXPECT_TRUE(output_str.find("Информатика") != std::string::npos);
-    EXPECT_TRUE(output_str.find("4.5") != std::string::npos);
+    EXPECT_TRUE(output_str.find("Иван Иванов") != std::string::npos) << "Output missing 'Иван Иванов'";
+    EXPECT_TRUE(output_str.find("Информатика") != std::string::npos) << "Output missing 'Информатика'";
+    EXPECT_TRUE(output_str.find("4.5") != std::string::npos) << "Output missing '4.5'";
 }
 
 TEST(FunctionTesting, DisplayStudentsEmpty) {
@@ -195,13 +195,13 @@ TEST(FunctionTesting, DisplayStudentsEmpty) {
     std::streambuf* old_cout = std::cout.rdbuf(output.rdbuf());
     displayStudents(database);
     std::cout.rdbuf(old_cout);
-    EXPECT_EQ(output.str(), "Список студентов:\n");
+    EXPECT_EQ(output.str(), "Список студентов:\n") << "Output mismatch for empty database";
 }
 
 TEST(FunctionTesting, SearchNameFound) {
     auto database = createTestDatabase();
     std::stringstream input;
-    input << "Иван Иванов\n";
+    input << "\nИван Иванов\n"; // Начальный \n для ignore
     std::streambuf* old_cin = std::cin.rdbuf(input.rdbuf());
     std::stringstream output;
     std::streambuf* old_cout = std::cout.rdbuf(output.rdbuf());
@@ -209,27 +209,27 @@ TEST(FunctionTesting, SearchNameFound) {
     std::cin.rdbuf(old_cin);
     std::cout.rdbuf(old_cout);
     std::string output_str = output.str();
-    EXPECT_TRUE(output_str.find("Иван Иванов") != std::string::npos);
-    EXPECT_TRUE(output_str.find("Информатика") != std::string::npos);
+    EXPECT_TRUE(output_str.find("Иван Иванов") != std::string::npos) << "Output missing 'Иван Иванов'";
+    EXPECT_TRUE(output_str.find("Информатика") != std::string::npos) << "Output missing 'Информатика'";
 }
 
 TEST(FunctionTesting, SearchNameNotFound) {
     auto database = createTestDatabase();
     std::stringstream input;
-    input << "Неизвестный\n";
+    input << "\nНеизвестный\n"; // Начальный \n для ignore
     std::streambuf* old_cin = std::cin.rdbuf(input.rdbuf());
     std::stringstream output;
     std::streambuf* old_cout = std::cout.rdbuf(output.rdbuf());
     searchName(database);
     std::cin.rdbuf(old_cin);
     std::cout.rdbuf(old_cout);
-    EXPECT_TRUE(output.str().find("не найден") != std::string::npos);
+    EXPECT_TRUE(output.str().find("не найден") != std::string::npos) << "Output missing 'не найден'";
 }
 
 TEST(FunctionTesting, SearchSpecFound) {
     auto database = createTestDatabase();
     std::stringstream input;
-    input << "Информатика\n";
+    input << "\nИнформатика\n"; // Начальный \n для ignore
     std::streambuf* old_cin = std::cin.rdbuf(input.rdbuf());
     std::stringstream output;
     std::streambuf* old_cout = std::cout.rdbuf(output.rdbuf());
@@ -237,21 +237,21 @@ TEST(FunctionTesting, SearchSpecFound) {
     std::cin.rdbuf(old_cin);
     std::cout.rdbuf(old_cout);
     std::string output_str = output.str();
-    EXPECT_TRUE(output_str.find("Иван Иванов") != std::string::npos);
-    EXPECT_TRUE(output_str.find("Мария Козлова") != std::string::npos);
+    EXPECT_TRUE(output_str.find("Иван Иванов") != std::string::npos) << "Output missing 'Иван Иванов'";
+    EXPECT_TRUE(output_str.find("Мария Козлова") != std::string::npos) << "Output missing 'Мария Козлова'";
 }
 
 TEST(FunctionTesting, SearchSpecNotFound) {
     auto database = createTestDatabase();
     std::stringstream input;
-    input << "Химия\n";
+    input << "\nХимия\n"; // Начальный \n для ignore
     std::streambuf* old_cin = std::cin.rdbuf(input.rdbuf());
     std::stringstream output;
     std::streambuf* old_cout = std::cout.rdbuf(output.rdbuf());
     searchSpec(database);
     std::cin.rdbuf(old_cin);
     std::cout.rdbuf(old_cout);
-    EXPECT_TRUE(output.str().find("не найден") != std::string::npos);
+    EXPECT_TRUE(output.str().find("не найден") != std::string::npos) << "Output missing 'не найден'";
 }
 
 TEST(FunctionTesting, LoadStudentsSuccess) {
@@ -263,11 +263,11 @@ TEST(FunctionTesting, LoadStudentsSuccess) {
     std::streambuf* old_cout = std::cout.rdbuf(output.rdbuf());
     loadStudents(database, "test.txt");
     std::cout.rdbuf(old_cout);
-    ASSERT_EQ(database.size(), 1);
-    EXPECT_EQ(database[0].name, "Иван Иванов");
-    EXPECT_EQ(database[0].age, 20);
-    EXPECT_EQ(database[0].major, "Информатика");
-    EXPECT_DOUBLE_EQ(database[0].gpa, 4.5);
+    ASSERT_EQ(database.size(), 1) << "Database size should be 1";
+    EXPECT_EQ(database[0].name, "Иван Иванов") << "Name mismatch";
+    EXPECT_EQ(database[0].age, 20) << "Age mismatch";
+    EXPECT_EQ(database[0].major, "Информатика") << "Major mismatch";
+    EXPECT_DOUBLE_EQ(database[0].gpa, 4.5) << "GPA mismatch";
 }
 
 TEST(FunctionTesting, LoadStudentsFileNotFound) {
@@ -276,8 +276,8 @@ TEST(FunctionTesting, LoadStudentsFileNotFound) {
     std::streambuf* old_cout = std::cout.rdbuf(output.rdbuf());
     loadStudents(database, "nonexistent.txt");
     std::cout.rdbuf(old_cout);
-    EXPECT_TRUE(output.str().find("Не удалось открыть файл") != std::string::npos);
-    EXPECT_EQ(database.size(), 0);
+    EXPECT_TRUE(output.str().find("Не удалось открыть файл") != std::string::npos) << "Output missing 'Не удалось открыть файл'";
+    EXPECT_EQ(database.size(), 0) << "Database size should be 0";
 }
 
 TEST(FunctionTesting, LoadStudentsInvalidLine) {
@@ -289,12 +289,13 @@ TEST(FunctionTesting, LoadStudentsInvalidLine) {
     std::streambuf* old_cout = std::cout.rdbuf(output.rdbuf());
     loadStudents(database, "test.txt");
     std::cout.rdbuf(old_cout);
-    EXPECT_TRUE(output.str().find("Ошибка чтения строки") != std::string::npos);
-    EXPECT_EQ(database.size(), 0);
+    EXPECT_TRUE(output.str().find("Ошибка чтения строки") != std::string::npos) << "Output missing 'Ошибка чтения строки'";
+    EXPECT_EQ(database.size(), 0) << "Database size should be 0";
 }
 
 TEST(FunctionTesting, MainMenuInvalidInput) {
-    std::stringstream input("invalid\n0\n");
+    std::stringstream input;
+    input << "invalid\n0\n";
     std::streambuf* old_cin = std::cin.rdbuf(input.rdbuf());
     std::stringstream output;
     std::streambuf* old_cout = std::cout.rdbuf(output.rdbuf());
@@ -328,8 +329,8 @@ TEST(FunctionTesting, MainMenuInvalidInput) {
     }
     std::cin.rdbuf(old_cin);
     std::cout.rdbuf(old_cout);
-    EXPECT_TRUE(output.str().find("Неверный ввод") != std::string::npos);
-    EXPECT_TRUE(output.str().find("Выход...") != std::string::npos);
+    EXPECT_TRUE(output.str().find("Неверный ввод") != std::string::npos) << "Output missing 'Неверный ввод'";
+    EXPECT_TRUE(output.str().find("Выход...") != std::string::npos) << "Output missing 'Выход...'";
 }
 
 // ------------------ MAIN ------------------
