@@ -13,36 +13,37 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     
-    - name: Install GoogleTest
+    - name: Install dependencies
       run: |
         sudo apt-get update
-        sudo apt-get install -y libgtest-dev cmake gcovr lcov
+        sudo apt-get install -y build-essential g++ libgtest-dev cmake gcovr lcov
         cd /usr/src/gtest
         sudo cmake .
         sudo make
         sudo cp lib/*.a /usr/lib/
-    - name: Installation
-      run: sudo apt update && sudo apt install -y build-essential
-    
-    - name: Compile with coverage flags
-      run: make CXXFLAGS="--coverage" LDFLAGS="--coverage" all
-    
+
+    - name: Compile with coverage
+      run: |
+        g++ --coverage -c main.cpp -o main.o
+        g++ --coverage -c utils.cpp -o utils.o
+        g++ --coverage main.o utils.o -o program.out
+
     - name: Execute tests
       run: ./program.out --run-tests
-    
+
     - name: Generate coverage report
       run: |
-        gcovr -r . --json > coverage.json
+        gcovr -r . --txt -o coverage.txt
         gcovr -r . --html --html-details -o coverage.html
-        gcovr -r . --xml-pretty > coverage.xml
-        gcovr -r . --txt > coverage.txt
+        gcovr -r . --xml-pretty -o coverage.xml
+        gcovr -r . --json -o coverage.json
 
     - name: Generate coverage badge
       uses: tj-actions/coverage-badge-py@v2
       with:
         file: coverage.txt
         output: coverage-badge.svg
-    
+
     - name: Upload coverage badge
       uses: actions/upload-artifact@v4
       with:
