@@ -122,108 +122,136 @@ std::vector<Student> createTestDatabase() {
 // ------------------ ТЕСТЫ ------------------
 TEST(FunctionTesting, AddStudent) {
     std::vector<Student> database;
-    std::stringstream input("Иван Иванов\n20\nИнформатика\n4.5\n");
+    std::stringstream input;
+    input << "Иван Иванов\n20\nИнформатика\n4.5\n";
     std::streambuf* old_cin = std::cin.rdbuf(input.rdbuf());
-    testing::internal::CaptureStdout();
+    std::stringstream output;
+    std::streambuf* old_cout = std::cout.rdbuf(output.rdbuf());
+
     addStudent(database);
+
     std::cin.rdbuf(old_cin);
-    std::string output = testing::internal::GetCapturedStdout();
+    std::cout.rdbuf(old_cout);
+
     ASSERT_EQ(database.size(), 1);
     EXPECT_EQ(database[0].name, "Иван Иванов");
     EXPECT_EQ(database[0].age, 20);
     EXPECT_EQ(database[0].major, "Информатика");
     EXPECT_DOUBLE_EQ(database[0].gpa, 4.5);
-    EXPECT_TRUE(output.find("Студент добавлен") != std::string::npos);
+    EXPECT_TRUE(output.str().find("Студент добавлен") != std::string::npos);
 }
 
 TEST(FunctionTesting, AddStudentInvalidAge) {
     std::vector<Student> database;
-    std::stringstream input("Иван Иванов\n-1\n20\nИнформатика\n4.5\n");
+    std::stringstream input;
+    input << "Иван Иванов\n-1\n20\nИнформатика\n4.5\n";
     std::streambuf* old_cin = std::cin.rdbuf(input.rdbuf());
-    testing::internal::CaptureStdout();
+    std::stringstream output;
+    std::streambuf* old_cout = std::cout.rdbuf(output.rdbuf());
+
     addStudent(database);
+
     std::cin.rdbuf(old_cin);
-    std::string output = testing::internal::GetCapturedStdout();
+    std::cout.rdbuf(old_cout);
+
     ASSERT_EQ(database.size(), 1);
     EXPECT_EQ(database[0].age, 20);
-    EXPECT_TRUE(output.find("Неверный возраст") != std::string::npos);
+    EXPECT_TRUE(output.str().find("Неверный возраст") != std::string::npos);
 }
 
 TEST(FunctionTesting, AddStudentInvalidGPA) {
     std::vector<Student> database;
-    std::stringstream input("Иван Иванов\n20\nИнформатика\n6.0\n4.5\n");
+    std::stringstream input;
+    input << "Иван Иванов\n20\nИнформатика\n6.0\n4.5\n";
     std::streambuf* old_cin = std::cin.rdbuf(input.rdbuf());
-    testing::internal::CaptureStdout();
+    std::stringstream output;
+    std::streambuf* old_cout = std::cout.rdbuf(output.rdbuf());
+
     addStudent(database);
+
     std::cin.rdbuf(old_cin);
-    std::string output = testing::internal::GetCapturedStdout();
+    std::cout.rdbuf(old_cout);
+
     ASSERT_EQ(database.size(), 1);
     EXPECT_DOUBLE_EQ(database[0].gpa, 4.5);
-    EXPECT_TRUE(output.find("Неверный балл") != std::string::npos);
+    EXPECT_TRUE(output.str().find("Неверный балл") != std::string::npos);
 }
 
 TEST(FunctionTesting, DisplayStudentsWithData) {
     auto database = createTestDatabase();
-    testing::internal::CaptureStdout();
+    std::stringstream output;
+    std::streambuf* old_cout = std::cout.rdbuf(output.rdbuf());
     displayStudents(database);
-    std::string output = testing::internal::GetCapturedStdout();
-    EXPECT_TRUE(output.find("Иван Иванов") != std::string::npos);
-    EXPECT_TRUE(output.find("Информатика") != std::string::npos);
-    EXPECT_TRUE(output.find("4.5") != std::string::npos);
+    std::cout.rdbuf(old_cout);
+    std::string output_str = output.str();
+    EXPECT_TRUE(output_str.find("Иван Иванов") != std::string::npos);
+    EXPECT_TRUE(output_str.find("Информатика") != std::string::npos);
+    EXPECT_TRUE(output_str.find("4.5") != std::string::npos);
 }
 
 TEST(FunctionTesting, DisplayStudentsEmpty) {
     std::vector<Student> database;
-    testing::internal::CaptureStdout();
+    std::stringstream output;
+    std::streambuf* old_cout = std::cout.rdbuf(output.rdbuf());
     displayStudents(database);
-    std::string output = testing::internal::GetCapturedStdout();
-    EXPECT_EQ(output, "Список студентов:\n");
+    std::cout.rdbuf(old_cout);
+    EXPECT_EQ(output.str(), "Список студентов:\n");
 }
 
 TEST(FunctionTesting, SearchNameFound) {
     auto database = createTestDatabase();
-    std::stringstream input("Иван Иванов\n");
+    std::stringstream input;
+    input << "Иван Иванов\n";
     std::streambuf* old_cin = std::cin.rdbuf(input.rdbuf());
-    testing::internal::CaptureStdout();
+    std::stringstream output;
+    std::streambuf* old_cout = std::cout.rdbuf(output.rdbuf());
     searchName(database);
     std::cin.rdbuf(old_cin);
-    std::string output = testing::internal::GetCapturedStdout();
-    EXPECT_TRUE(output.find("Иван Иванов") != std::string::npos);
-    EXPECT_TRUE(output.find("Информатика") != std::string::npos);
+    std::cout.rdbuf(old_cout);
+    std::string output_str = output.str();
+    EXPECT_TRUE(output_str.find("Иван Иванов") != std::string::npos);
+    EXPECT_TRUE(output_str.find("Информатика") != std::string::npos);
 }
 
 TEST(FunctionTesting, SearchNameNotFound) {
     auto database = createTestDatabase();
-    std::stringstream input("Неизвестный\n");
+    std::stringstream input;
+    input << "Неизвестный\n";
     std::streambuf* old_cin = std::cin.rdbuf(input.rdbuf());
-    testing::internal::CaptureStdout();
+    std::stringstream output;
+    std::streambuf* old_cout = std::cout.rdbuf(output.rdbuf());
     searchName(database);
     std::cin.rdbuf(old_cin);
-    std::string output = testing::internal::GetCapturedStdout();
-    EXPECT_TRUE(output.find("не найден") != std::string::npos);
+    std::cout.rdbuf(old_cout);
+    EXPECT_TRUE(output.str().find("не найден") != std::string::npos);
 }
 
 TEST(FunctionTesting, SearchSpecFound) {
     auto database = createTestDatabase();
-    std::stringstream input("Информатика\n");
+    std::stringstream input;
+    input << "Информатика\n";
     std::streambuf* old_cin = std::cin.rdbuf(input.rdbuf());
-    testing::internal::CaptureStdout();
+    std::stringstream output;
+    std::streambuf* old_cout = std::cout.rdbuf(output.rdbuf());
     searchSpec(database);
     std::cin.rdbuf(old_cin);
-    std::string output = testing::internal::GetCapturedStdout();
-    EXPECT_TRUE(output.find("Иван Иванов") != std::string::npos);
-    EXPECT_TRUE(output.find("Мария Козлова") != std::string::npos);
+    std::cout.rdbuf(old_cout);
+    std::string output_str = output.str();
+    EXPECT_TRUE(output_str.find("Иван Иванов") != std::string::npos);
+    EXPECT_TRUE(output_str.find("Мария Козлова") != std::string::npos);
 }
 
 TEST(FunctionTesting, SearchSpecNotFound) {
     auto database = createTestDatabase();
-    std::stringstream input("Химия\n");
+    std::stringstream input;
+    input << "Химия\n";
     std::streambuf* old_cin = std::cin.rdbuf(input.rdbuf());
-    testing::internal::CaptureStdout();
+    std::stringstream output;
+    std::streambuf* old_cout = std::cout.rdbuf(output.rdbuf());
     searchSpec(database);
     std::cin.rdbuf(old_cin);
-    std::string output = testing::internal::GetCapturedStdout();
-    EXPECT_TRUE(output.find("не найден") != std::string::npos);
+    std::cout.rdbuf(old_cout);
+    EXPECT_TRUE(output.str().find("не найден") != std::string::npos);
 }
 
 TEST(FunctionTesting, LoadStudentsSuccess) {
@@ -231,9 +259,10 @@ TEST(FunctionTesting, LoadStudentsSuccess) {
     file << "Иван Иванов 20 Информатика 4.5\n";
     file.close();
     std::vector<Student> database;
-    testing::internal::CaptureStdout();
+    std::stringstream output;
+    std::streambuf* old_cout = std::cout.rdbuf(output.rdbuf());
     loadStudents(database, "test.txt");
-    std::string output = testing::internal::GetCapturedStdout();
+    std::cout.rdbuf(old_cout);
     ASSERT_EQ(database.size(), 1);
     EXPECT_EQ(database[0].name, "Иван Иванов");
     EXPECT_EQ(database[0].age, 20);
@@ -243,29 +272,32 @@ TEST(FunctionTesting, LoadStudentsSuccess) {
 
 TEST(FunctionTesting, LoadStudentsFileNotFound) {
     std::vector<Student> database;
-    testing::internal::CaptureStdout();
+    std::stringstream output;
+    std::streambuf* old_cout = std::cout.rdbuf(output.rdbuf());
     loadStudents(database, "nonexistent.txt");
-    std::string output = testing::internal::GetCapturedStdout();
-    EXPECT_TRUE(output.find("Не удалось открыть файл") != std::string::npos);
+    std::cout.rdbuf(old_cout);
+    EXPECT_TRUE(output.str().find("Не удалось открыть файл") != std::string::npos);
     EXPECT_EQ(database.size(), 0);
 }
 
 TEST(FunctionTesting, LoadStudentsInvalidLine) {
     std::ofstream file("test.txt");
-    file << "Иван Иванов 20 Информатика\n"; // Неполная строка
+    file << "Иван Иванов 20 Информатика\n";
     file.close();
     std::vector<Student> database;
-    testing::internal::CaptureStdout();
+    std::stringstream output;
+    std::streambuf* old_cout = std::cout.rdbuf(output.rdbuf());
     loadStudents(database, "test.txt");
-    std::string output = testing::internal::GetCapturedStdout();
-    EXPECT_TRUE(output.find("Ошибка чтения строки") != std::string::npos);
+    std::cout.rdbuf(old_cout);
+    EXPECT_TRUE(output.str().find("Ошибка чтения строки") != std::string::npos);
     EXPECT_EQ(database.size(), 0);
 }
 
 TEST(FunctionTesting, MainMenuInvalidInput) {
     std::stringstream input("invalid\n0\n");
     std::streambuf* old_cin = std::cin.rdbuf(input.rdbuf());
-    testing::internal::CaptureStdout();
+    std::stringstream output;
+    std::streambuf* old_cout = std::cout.rdbuf(output.rdbuf());
     std::vector<Student> database;
     loadStudents(database, "bd.txt");
     int choice = -1;
@@ -295,9 +327,9 @@ TEST(FunctionTesting, MainMenuInvalidInput) {
         }
     }
     std::cin.rdbuf(old_cin);
-    std::string output = testing::internal::GetCapturedStdout();
-    EXPECT_TRUE(output.find("Неверный ввод") != std::string::npos);
-    EXPECT_TRUE(output.find("Выход...") != std::string::npos);
+    std::cout.rdbuf(old_cout);
+    EXPECT_TRUE(output.str().find("Неверный ввод") != std::string::npos);
+    EXPECT_TRUE(output.str().find("Выход...") != std::string::npos);
 }
 
 // ------------------ MAIN ------------------
