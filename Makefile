@@ -1,18 +1,12 @@
 CXX = g++
-CXXFLAGS = -Wall --coverage
+CXXFLAGS = -Wall -std=c++17 --coverage
 LDFLAGS = --coverage
 
-SOURCES = main.cpp utils.cpp
-OBJECTS = $(SOURCES:.cpp=.o)
+OBJS = main.o utils.o  # все объектные файлы
 TARGET = my_program
 
-all: $(TARGET)
-
-$(TARGET): $(OBJECTS)
-	$(CXX) $(CXXFLAGS) -o $(TARGET) $(OBJECTS) $(LDFLAGS)
+$(TARGET): $(OBJS)
+    $(CXX) $(LDFLAGS) -o $@ $(OBJS)
 
 %.o: %.cpp
-	$(CXX) $(CXXFLAGS) -c $< -o $@
-
-clean:
-	rm -f $(OBJECTS) $(TARGET) *.gcda *.gcno
+    $(CXX) $(CXXFLAGS) -c $< -o $@
