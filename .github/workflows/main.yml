@@ -1,4 +1,4 @@
-name: C/C++ CI with Coverage
+name: C/C++ CI
 
 on:
   push:
@@ -7,12 +7,11 @@ on:
     branches: [ "main" ]
 
 jobs:
-  build-and-test:
+  build:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v3
+    - uses: actions/checkout@v4
 
     - name: Install dependencies
       run: |
@@ -26,20 +25,28 @@ jobs:
         sudo cmake --build build
         sudo cp build/lib/lib*.a /usr/lib
 
-    - name: Build project with coverage
+    - name: Compile with coverage
       run: |
         g++ -fprofile-arcs -ftest-coverage -std=c++17 main.cpp \
-            -I/usr/include/gtest -lgtest -lgtest_main -pthread -o prog
+            -I/usr/include/gtest -lgtest -lgtest_main -pthread -o program.out
 
-    - name: Run tests
-      run: ./prog --run-tests
+    - name: Check coverage files
+      run: |
+        ls -l *.gcno || echo "No .gcno files found"
+
+    - name: Execute tests
+      run: ./program.out --run-tests
+
+    - name: Check coverage data
+      run: |
+        ls -l *.gcda || echo "No .gcda files found"
 
     - name: Generate coverage
       run: |
         lcov --capture --directory . --output-file coverage.info --ignore-errors mismatch
         lcov --remove coverage.info '/usr/*' --output-file coverage.info
         lcov --list coverage.info
-        PERCENT=$(lcov --list coverage.info | grep "lines" | awk '{print $2}' | sed 's/%//' | head -1)
+        PERCENT=$(lcov --list coverage.info | grep "lines" | awk '{print $2}' | sed 's/%//' | head -1 || echo "0")
         echo "COVERAGE=${PERCENT:-0}" >> $GITHUB_ENV
 
     - name: Create coverage badge
@@ -51,4 +58,4 @@ jobs:
         label: Coverage
         message: ${{ env.COVERAGE }}%
         color: green
-        style: plastic
+        style: flat
