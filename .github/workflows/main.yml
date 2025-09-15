@@ -13,17 +13,20 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     
-    - name: Install GoogleTest
+    - name: Install dependencies
       run: |
         sudo apt-get update
-        sudo apt-get install -y libgtest-dev cmake
+        sudo apt-get install -y libgtest-dev cmake build-essential
+        # Build Google Test from source to ensure compatibility
         cd /usr/src/gtest
-        sudo cmake .
+        sudo cmake -DBUILD_SHARED_LIBS=ON .
         sudo make
-        sudo cp lib/*.a /usr/lib/
-    
-    - name: Install build essentials
-      run: sudo apt update && sudo apt install -y build-essential
+        sudo cp lib/libgtest*.so /usr/lib/
+        sudo cp lib/libgtest_main*.so /usr/lib/
+        sudo ldconfig  # Update linker cache
+        # Verify library installation
+        ls -l /usr/lib/libgtest*.so
+        ls -l /usr/lib/libgtest_main*.so
     
     - name: Compile
       run: g++ -std=c++14 -I/usr/include -L/usr/lib -lgtest -lgtest_main -pthread main.cpp -o program.out
