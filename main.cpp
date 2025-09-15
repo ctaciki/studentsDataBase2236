@@ -105,7 +105,6 @@ void searchSpec(const std::vector<Student>& database) {
     }
 }
 
-// Простой и надежный тест без подмены cin
 // Вспомогательная функция для создания тестовой базы данных
 std::vector<Student> createTestDatabase() {
     std::vector<Student> database;
@@ -161,8 +160,7 @@ TEST(FunctionTesting, AddStudent) {
     EXPECT_DOUBLE_EQ(database[0].gpa, 4.5);
 }
 
-// Дополнительный тест для проверки нескольких студентов
-TEST(FunctionTesting, MultipleStudents) {
+// Тест для проверки добавления нескольких студентов
 TEST(FunctionTesting, AddMultipleStudents) {
     std::vector<Student> database;
 
@@ -277,7 +275,6 @@ TEST(FunctionTesting, SearchSpecFound) {
     std::string output = testing::internal::GetCapturedStdout();
     EXPECT_TRUE(found);
     EXPECT_TRUE(output.find("Информатика") != std::string::npos);
-    // Должны найти двух студентов с Информатикой
     EXPECT_TRUE(output.find("Иван Иванов") != std::string::npos);
     EXPECT_TRUE(output.find("Мария Козлова") != std::string::npos);
 }
