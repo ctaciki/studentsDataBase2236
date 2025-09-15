@@ -1,4 +1,18 @@
-all:
-	g++ -std=c++20 main.cpp -lgtest -lgtest_main -pthread -o program.out
+CXX = g++
+CXXFLAGS = -Wall --coverage
+LDFLAGS = --coverage
+
+SOURCES = main.cpp utils.cpp
+OBJECTS = $(SOURCES:.cpp=.o)
+TARGET = my_program
+
+all: $(TARGET)
+
+$(TARGET): $(OBJECTS)
+	$(CXX) $(CXXFLAGS) -o $(TARGET) $(OBJECTS) $(LDFLAGS)
+
+%.o: %.cpp
+	$(CXX) $(CXXFLAGS) -c $< -o $@
+
 clean:
-	rm program.out
+	rm -f $(OBJECTS) $(TARGET) *.gcda *.gcno
