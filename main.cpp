@@ -123,8 +123,7 @@ std::vector<Student> createTestDatabase() {
 TEST(FunctionTesting, AddStudent) {
     std::vector<Student> database;
     std::stringstream input("Иван Иванов\n20\nИнформатика\n4.5\n");
-    std::streambuf* old_cin = std::cin.rdbuf();
-    std::cin.rdbuf(input.rdbuf());
+    std::streambuf* old_cin = std::cin.rdbuf(input.rdbuf());
     testing::internal::CaptureStdout();
     addStudent(database);
     std::cin.rdbuf(old_cin);
@@ -140,8 +139,7 @@ TEST(FunctionTesting, AddStudent) {
 TEST(FunctionTesting, AddStudentInvalidAge) {
     std::vector<Student> database;
     std::stringstream input("Иван Иванов\n-1\n20\nИнформатика\n4.5\n");
-    std::streambuf* old_cin = std::cin.rdbuf();
-    std::cin.rdbuf(input.rdbuf());
+    std::streambuf* old_cin = std::cin.rdbuf(input.rdbuf());
     testing::internal::CaptureStdout();
     addStudent(database);
     std::cin.rdbuf(old_cin);
@@ -154,8 +152,7 @@ TEST(FunctionTesting, AddStudentInvalidAge) {
 TEST(FunctionTesting, AddStudentInvalidGPA) {
     std::vector<Student> database;
     std::stringstream input("Иван Иванов\n20\nИнформатика\n6.0\n4.5\n");
-    std::streambuf* old_cin = std::cin.rdbuf();
-    std::cin.rdbuf(input.rdbuf());
+    std::streambuf* old_cin = std::cin.rdbuf(input.rdbuf());
     testing::internal::CaptureStdout();
     addStudent(database);
     std::cin.rdbuf(old_cin);
@@ -186,8 +183,7 @@ TEST(FunctionTesting, DisplayStudentsEmpty) {
 TEST(FunctionTesting, SearchNameFound) {
     auto database = createTestDatabase();
     std::stringstream input("Иван Иванов\n");
-    std::streambuf* old_cin = std::cin.rdbuf();
-    std::cin.rdbuf(input.rdbuf());
+    std::streambuf* old_cin = std::cin.rdbuf(input.rdbuf());
     testing::internal::CaptureStdout();
     searchName(database);
     std::cin.rdbuf(old_cin);
@@ -199,8 +195,7 @@ TEST(FunctionTesting, SearchNameFound) {
 TEST(FunctionTesting, SearchNameNotFound) {
     auto database = createTestDatabase();
     std::stringstream input("Неизвестный\n");
-    std::streambuf* old_cin = std::cin.rdbuf();
-    std::cin.rdbuf(input.rdbuf());
+    std::streambuf* old_cin = std::cin.rdbuf(input.rdbuf());
     testing::internal::CaptureStdout();
     searchName(database);
     std::cin.rdbuf(old_cin);
@@ -211,8 +206,7 @@ TEST(FunctionTesting, SearchNameNotFound) {
 TEST(FunctionTesting, SearchSpecFound) {
     auto database = createTestDatabase();
     std::stringstream input("Информатика\n");
-    std::streambuf* old_cin = std::cin.rdbuf();
-    std::cin.rdbuf(input.rdbuf());
+    std::streambuf* old_cin = std::cin.rdbuf(input.rdbuf());
     testing::internal::CaptureStdout();
     searchSpec(database);
     std::cin.rdbuf(old_cin);
@@ -224,8 +218,7 @@ TEST(FunctionTesting, SearchSpecFound) {
 TEST(FunctionTesting, SearchSpecNotFound) {
     auto database = createTestDatabase();
     std::stringstream input("Химия\n");
-    std::streambuf* old_cin = std::cin.rdbuf();
-    std::cin.rdbuf(input.rdbuf());
+    std::streambuf* old_cin = std::cin.rdbuf(input.rdbuf());
     testing::internal::CaptureStdout();
     searchSpec(database);
     std::cin.rdbuf(old_cin);
@@ -267,6 +260,44 @@ TEST(FunctionTesting, LoadStudentsInvalidLine) {
     std::string output = testing::internal::GetCapturedStdout();
     EXPECT_TRUE(output.find("Ошибка чтения строки") != std::string::npos);
     EXPECT_EQ(database.size(), 0);
+}
+
+TEST(FunctionTesting, MainMenuInvalidInput) {
+    std::stringstream input("invalid\n0\n");
+    std::streambuf* old_cin = std::cin.rdbuf(input.rdbuf());
+    testing::internal::CaptureStdout();
+    std::vector<Student> database;
+    loadStudents(database, "bd.txt");
+    int choice = -1;
+    while (choice != 0) {
+        std::cout << "Меню:\n"
+                  << "1. Добавить студента\n"
+                  << "2. Вывести список студентов\n"
+                  << "3. Найти по имени\n"
+                  << "4. Найти по специальности\n"
+                  << "5. Запустить тесты\n"
+                  << "0. Выход\n"
+                  << "Выберите действие: ";
+        if (!(std::cin >> choice)) {
+            std::cout << "Неверный ввод.\n";
+            std::cin.clear();
+            std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+            continue;
+        }
+        switch (choice) {
+            case 1: addStudent(database); break;
+            case 2: displayStudents(database); break;
+            case 3: searchName(database); break;
+            case 4: searchSpec(database); break;
+            case 5: std::cout << "Перезапустите с --run-tests\n"; break;
+            case 0: std::cout << "Выход...\n"; break;
+            default: std::cout << "Неверный выбор.\n";
+        }
+    }
+    std::cin.rdbuf(old_cin);
+    std::string output = testing::internal::GetCapturedStdout();
+    EXPECT_TRUE(output.find("Неверный ввод") != std::string::npos);
+    EXPECT_TRUE(output.find("Выход...") != std::string::npos);
 }
 
 // ------------------ MAIN ------------------
