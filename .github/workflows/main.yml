@@ -34,29 +34,29 @@ jobs:
     - name: Generate test badge (passing)
       uses: emibcn/badge-action@v1.2.4
       with:
-        label: 'Tests'
+        label: Tests
         labelColor: '555'
-        status: 'passing'
-        gradient: [ 'green' ]
-        style: 'classic'
+        status: passing
+        color: green
+        style: classic
         icon: null
         iconWidth: '13'
         scale: '1'
-        path: 'test-badge.svg'
+        path: test-badge.svg
       if: success()
     
     - name: Generate test badge (failing)
       uses: emibcn/badge-action@v1.2.4
       with:
-        label: 'Tests'
+        label: Tests
         labelColor: '555'
-        status: 'failing'
-        gradient: [ 'red' ]
-        style: 'classic'
+        status: failing
+        color: red
+        style: classic
         icon: null
         iconWidth: '13'
         scale: '1'
-        path: 'test-badge.svg'
+        path: test-badge.svg
       if: failure()
     
     - name: Commit badge
