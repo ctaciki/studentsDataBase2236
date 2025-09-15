@@ -1,4 +1,4 @@
-name: C/C++ CI
+name: C/C++ CI with Badge
 
 on:
   push:
@@ -9,53 +9,51 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-
+    
     steps:
     - uses: actions/checkout@v4
-
-    - name: Install dependencies
+    
+    - name: Install GoogleTest
       run: |
         sudo apt-get update
-        sudo apt-get install -y cmake build-essential libgtest-dev lcov
-
-    - name: Build Google Test
-      run: |
-        cd /usr/src/googletest
-        sudo cmake -S . -B build
-        sudo cmake --build build
-        sudo cp build/lib/lib*.a /usr/lib
-
-    - name: Compile with coverage
-      run: |
-        g++ -fprofile-arcs -ftest-coverage -std=c++17 main.cpp \
-            -I/usr/include/gtest -lgtest -lgtest_main -pthread -o program.out
-
-    - name: Check coverage files
-      run: |
-        ls -l *.gcno || echo "No .gcno files found"
-
+        sudo apt-get install -y libgtest-dev cmake
+        cd /usr/src/gtest
+        sudo cmake .
+        sudo make
+        sudo cp lib/*.a /usr/lib/
+    
+    - name: Install build essentials
+      run: sudo apt update && sudo apt install -y build-essential
+    
+    - name: Compile
+      run: g++ -std=c++11 -I/usr/include -L/usr/lib -lgtest -lgtest_main -pthread main.cpp -o program.out
+    
     - name: Execute tests
       run: ./program.out --run-tests
-
-    - name: Check coverage data
-      run: |
-        ls -l *.gcda || echo "No .gcda files found"
-
-    - name: Generate coverage
-      run: |
-        lcov --capture --directory . --output-file coverage.info --ignore-errors mismatch
-        lcov --remove coverage.info '/usr/*' --output-file coverage.info
-        lcov --list coverage.info
-        PERCENT=$(lcov --list coverage.info | grep "lines" | awk '{print $2}' | sed 's/%//' | head -1 || echo "0")
-        echo "COVERAGE=${PERCENT:-0}" >> $GITHUB_ENV
-
-    - name: Create coverage badge
-      uses: schneegans/dynamic-badges-action@v1.7.0
+    
+    - name: Generate test badge
+      uses: emibcn/badge-action@v1.2.4
       with:
-        auth: ${{ secrets.GIST_SECRET }}
-        gistID: 56ceb89e202d8eb2b4d499bd8b387c46
-        filename: coverage.json
-        label: Coverage
-        message: ${{ env.COVERAGE }}%
-        color: green
-        style: flat
+        label: 'Tests'
+        status: 'passing'
+        color: 'green'
+        path: 'test-badge.svg'
+      if: success()
+    
+    - name: Generate failing test badge
+      uses: emibcn/badge-action@v1.2.4
+      with:
+        label: 'Tests'
+        status: 'failing'
+        color: 'red'
+        path: 'test-badge.svg'
+      if: failure()
+    
+    - name: Commit badge
+      run: |
+        git config --global user.name 'GitHub Action'
+        git config --global user.email 'action@github.com'
+        git add test-badge.svg
+        git commit -m 'Update test badge'
+        git push
+      if: always()
