@@ -1,33 +1,50 @@
-CXX = g++
-CXXFLAGS = -Wall -Wextra -std=c++11
-COVERAGE_FLAGS = -fprofile-arcs -ftest-coverage
-TEST_FLAGS = -lgtest -lgtest_main -lpthread
+name: C/C++ CI
 
-SRC = main.cpp
-OBJ = $(SRC:.cpp=.o)
-TEST_OBJ = $(SRC:.cpp=_test.o)
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
 
-TARGET = program.out
-TEST_TARGET = test_program.out
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Install GoogleTest
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y libgtest-dev cmake gcovr lcov
+        cd /usr/src/gtest
+        sudo cmake .
+        sudo make
+        sudo cp lib/*.a /usr/lib/
+    - name: Installation
+      run: sudo apt update && sudo apt install -y build-essential
+    
+    - name: Compile with coverage flags
+      run: make CXXFLAGS="--coverage" LDFLAGS="--coverage" all
+    
+    - name: Execute tests
+      run: ./program.out --run-tests
+    
+    - name: Generate coverage report
+      run: |
+        gcovr -r . --json > coverage.json
+        gcovr -r . --html --html-details -o coverage.html
+        gcovr -r . --xml-pretty > coverage.xml
+        gcovr -r . --txt > coverage.txt
 
-all: $(TARGET)
-
-$(TARGET): $(OBJ)
-	$(CXX) $(CXXFLAGS) -o $@ $^
-
-test: $(TEST_TARGET)
-
-$(TEST_TARGET): $(SRC)
-	$(CXX) $(CXXFLAGS) $(COVERAGE_FLAGS) -o $@ $^ $(TEST_FLAGS)
-
-coverage: test
-	./$(TEST_TARGET) --run-tests
-	gcov $(SRC)
-	lcov --capture --directory . --output-file coverage.info
-	genhtml coverage.info --output-directory coverage_report
-
-clean:
-	rm -f $(TARGET) $(TEST_TARGET) *.o *.gcno *.gcda *.gcov coverage.info
-	rm -rf coverage_report
-
-.PHONY: all test coverage clean
+    - name: Generate coverage badge
+      uses: tj-actions/coverage-badge-py@v2
+      with:
+        file: coverage.txt
+        output: coverage-badge.svg
+    
+    - name: Upload coverage badge
+      uses: actions/upload-artifact@v4
+      with:
+        name: coverage-badge
+        path: coverage-badge.svg
