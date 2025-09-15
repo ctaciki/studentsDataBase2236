@@ -23,7 +23,11 @@ void loadStudents(std::vector<Student>& database, const std::string& filename) {
     while (std::getline(file, line)) {
         std::istringstream iss(line);
         Student student;
-        if (iss >> student.name >> student.age >> student.major >> student.gpa) {
+        std::getline(iss, student.name, ' '); // Считываем имя до первого пробела
+        std::string second_name;
+        std::getline(iss, second_name, ' '); // Считываем фамилию до следующего пробела
+        student.name += " " + second_name; // Объединяем имя и фамилию
+        if (iss >> student.age >> student.major >> student.gpa) {
             database.push_back(student);
         } else {
             std::cout << "Ошибка чтения строки: " << line << "\n";
@@ -123,7 +127,7 @@ std::vector<Student> createTestDatabase() {
 TEST(FunctionTesting, AddStudent) {
     std::vector<Student> database;
     std::stringstream input;
-    input << "\nИван Иванов\n20\nИнформатика\n4.5\n"; // Добавляем начальный \n для первого ignore
+    input << "\nИван Иванов\n20\nИнформатика\n4.5\n"; // Начальный \n для ignore
     std::streambuf* old_cin = std::cin.rdbuf(input.rdbuf());
     std::stringstream output;
     std::streambuf* old_cout = std::cout.rdbuf(output.rdbuf());
@@ -256,7 +260,7 @@ TEST(FunctionTesting, SearchSpecNotFound) {
 
 TEST(FunctionTesting, LoadStudentsSuccess) {
     std::ofstream file("test.txt");
-    file << "Иван Иванов 20 Информатика 4.5\n";
+    file << "Иван Иванов 20 Информатика 4.5\n"; // Формат соответствует новому парсингу
     file.close();
     std::vector<Student> database;
     std::stringstream output;
@@ -282,7 +286,7 @@ TEST(FunctionTesting, LoadStudentsFileNotFound) {
 
 TEST(FunctionTesting, LoadStudentsInvalidLine) {
     std::ofstream file("test.txt");
-    file << "Иван Иванов 20 Информатика\n";
+    file << "Иван\n"; // Неполная строка
     file.close();
     std::vector<Student> database;
     std::stringstream output;
@@ -329,8 +333,9 @@ TEST(FunctionTesting, MainMenuInvalidInput) {
     }
     std::cin.rdbuf(old_cin);
     std::cout.rdbuf(old_cout);
-    EXPECT_TRUE(output.str().find("Неверный ввод") != std::string::npos) << "Output missing 'Неверный ввод'";
-    EXPECT_TRUE(output.str().find("Выход...") != std::string::npos) << "Output missing 'Выход...'";
+    std::string output_str = output.str();
+    EXPECT_TRUE(output_str.find("Неверный ввод") != std::string::npos) << "Output missing 'Неверный ввод'";
+    EXPECT_TRUE(output_str.find("Выход...") != std::string::npos) << "Output missing 'Выход...'";
 }
 
 // ------------------ MAIN ------------------
