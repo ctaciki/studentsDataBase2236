@@ -31,21 +31,31 @@ jobs:
     - name: Execute tests
       run: ./program.out --run-tests
     
-    - name: Generate test badge
+    - name: Generate test badge (passing)
       uses: emibcn/badge-action@v1.2.4
       with:
         label: 'Tests'
+        labelColor: '555'
         status: 'passing'
-        color: 'green'
+        gradient: [ 'green' ]
+        style: 'classic'
+        icon: null
+        iconWidth: '13'
+        scale: '1'
         path: 'test-badge.svg'
       if: success()
     
-    - name: Generate failing test badge
+    - name: Generate test badge (failing)
       uses: emibcn/badge-action@v1.2.4
       with:
         label: 'Tests'
+        labelColor: '555'
         status: 'failing'
-        color: 'red'
+        gradient: [ 'red' ]
+        style: 'classic'
+        icon: null
+        iconWidth: '13'
+        scale: '1'
         path: 'test-badge.svg'
       if: failure()
     
