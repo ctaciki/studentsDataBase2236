@@ -1,71 +1,33 @@
-name: CI with Code Coverage
+CXX = g++
+CXXFLAGS = -Wall -Wextra -std=c++11
+COVERAGE_FLAGS = -fprofile-arcs -ftest-coverage
+TEST_FLAGS = -lgtest -lgtest_main -lpthread
 
-on:
-  push:
-    branches: [ main, master ]
-  pull_request:
-    branches: [ main, master ]
+SRC = main.cpp
+OBJ = $(SRC:.cpp=.o)
+TEST_OBJ = $(SRC:.cpp=_test.o)
 
-jobs:
-  build-and-test:
-    runs-on: ubuntu-latest
+TARGET = program.out
+TEST_TARGET = test_program.out
 
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+all: $(TARGET)
 
-    - name: Install dependencies
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y cmake g++ libgtest-dev lcov
+$(TARGET): $(OBJ)
+	$(CXX) $(CXXFLAGS) -o $@ $^
 
-    - name: Configure CMake
-      run: cmake -B build -DCMAKE_BUILD_TYPE=Debug
+test: $(TEST_TARGET)
 
-    - name: Build
-      run: cmake --build build
+$(TEST_TARGET): $(SRC)
+	$(CXX) $(CXXFLAGS) $(COVERAGE_FLAGS) -o $@ $^ $(TEST_FLAGS)
 
-    - name: Run tests
-      run: ./build/StudentDatabase --run-tests
+coverage: test
+	./$(TEST_TARGET) --run-tests
+	gcov $(SRC)
+	lcov --capture --directory . --output-file coverage.info
+	genhtml coverage.info --output-directory coverage_report
 
-    - name: Generate coverage report
-      run: |
-        # Компилируем с поддержкой coverage
-        cmake -B coverage-build -DCMAKE_BUILD_TYPE=Coverage
-        cmake --build coverage-build
-        
-        # Запускаем тесты для генерации coverage данных
-        ./coverage-build/StudentDatabase --run-tests
-        
-        # Генерируем отчет
-        lcov --capture --directory . --output-file coverage.info
-        lcov --remove coverage.info '/usr/*' '*/test/*' '*/googletest/*' --output-file coverage.filtered.info
-        genhtml coverage.filtered.info --output-directory coverage-report
+clean:
+	rm -f $(TARGET) $(TEST_TARGET) *.o *.gcno *.gcda *.gcov coverage.info
+	rm -rf coverage_report
 
-    - name: Upload coverage report
-      uses: actions/upload-artifact@v4
-      with:
-        name: coverage-report
-        path: coverage-report/
-
-    - name: Upload coverage to Codecov
-      uses: codecov/codecov-action@v3
-      with:
-        file: ./coverage.info
-        flags: unittests
-        name: codecov-umbrella
-
-  coverage-badge:
-    runs-on: ubuntu-latest
-    needs: build-and-test
-    steps:
-    - name: Generate coverage badge
-      uses: schneegans/dynamic-badges-action@v1.7.0
-      with:
-        auth: ${{ secrets.GIST_SECRET }}
-        gistID: ${{ vars.GIST_ID }}
-        filename: coverage.json
-        label: Coverage
-        message: ${{ needs.build-and-test.result == 'success' && '✅' || '❌' }}
-        color: ${{ needs.build-and-test.result == 'success' && 'green' || 'red' }}
-        namedLogo: codecov
+.PHONY: all test coverage clean
