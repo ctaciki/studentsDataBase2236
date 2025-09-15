@@ -26,7 +26,7 @@ jobs:
       run: sudo apt update && sudo apt install -y build-essential
     
     - name: Compile
-      run: g++ -std=c++11 -I/usr/include -L/usr/lib -lgtest -lgtest_main -pthread main.cpp -o program.out
+      run: g++ -std=c++14 -I/usr/include -L/usr/lib -lgtest -lgtest_main -pthread main.cpp -o program.out
     
     - name: Execute tests
       run: ./program.out --run-tests
@@ -54,6 +54,6 @@ jobs:
         git config --global user.name 'GitHub Action'
         git config --global user.email 'action@github.com'
         git add test-badge.svg
-        git commit -m 'Update test badge'
+        git commit -m 'Update test badge' || echo "No changes to commit"
         git push
       if: always()
