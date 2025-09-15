@@ -1,72 +1,71 @@
-name: C/C++ CI with Badge
+name: CI with Code Coverage
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ main, master ]
   pull_request:
-    branches: [ "main" ]
+    branches: [ main, master ]
 
 jobs:
-  build:
+  build-and-test:
     runs-on: ubuntu-latest
-    
+
     steps:
-    - uses: actions/checkout@v4
-    
+    - name: Checkout code
+      uses: actions/checkout@v4
+
     - name: Install dependencies
       run: |
         sudo apt-get update
-        sudo apt-get install -y libgtest-dev cmake build-essential
-        # Build Google Test from source to ensure compatibility
-        cd /usr/src/gtest
-        sudo cmake -DBUILD_SHARED_LIBS=ON .
-        sudo make
-        sudo cp lib/libgtest*.so /usr/lib/
-        sudo cp lib/libgtest_main*.so /usr/lib/
-        sudo ldconfig  # Update linker cache
-        # Verify library installation
-        ls -l /usr/lib/libgtest*.so
-        ls -l /usr/lib/libgtest_main*.so
-    
-    - name: Compile
-      run: g++ -std=c++14 -I/usr/include -L/usr/lib -lgtest -lgtest_main -pthread main.cpp -o program.out
-    
-    - name: Execute tests
-      run: ./program.out --run-tests
-    
-    - name: Generate test badge (passing)
-      uses: emibcn/badge-action@v1.2.4
-      with:
-        label: Tests
-        labelColor: '555'
-        status: passing
-        color: green
-        style: classic
-        icon: null
-        iconWidth: '13'
-        scale: '1'
-        path: test-badge.svg
-      if: success()
-    
-    - name: Generate test badge (failing)
-      uses: emibcn/badge-action@v1.2.4
-      with:
-        label: Tests
-        labelColor: '555'
-        status: failing
-        color: red
-        style: classic
-        icon: null
-        iconWidth: '13'
-        scale: '1'
-        path: test-badge.svg
-      if: failure()
-    
-    - name: Commit badge
+        sudo apt-get install -y cmake g++ libgtest-dev lcov
+
+    - name: Configure CMake
+      run: cmake -B build -DCMAKE_BUILD_TYPE=Debug
+
+    - name: Build
+      run: cmake --build build
+
+    - name: Run tests
+      run: ./build/StudentDatabase --run-tests
+
+    - name: Generate coverage report
       run: |
-        git config --global user.name 'GitHub Action'
-        git config --global user.email 'action@github.com'
-        git add test-badge.svg
-        git commit -m 'Update test badge' || echo "No changes to commit"
-        git push
-      if: always()
+        # Компилируем с поддержкой coverage
+        cmake -B coverage-build -DCMAKE_BUILD_TYPE=Coverage
+        cmake --build coverage-build
+        
+        # Запускаем тесты для генерации coverage данных
+        ./coverage-build/StudentDatabase --run-tests
+        
+        # Генерируем отчет
+        lcov --capture --directory . --output-file coverage.info
+        lcov --remove coverage.info '/usr/*' '*/test/*' '*/googletest/*' --output-file coverage.filtered.info
+        genhtml coverage.filtered.info --output-directory coverage-report
+
+    - name: Upload coverage report
+      uses: actions/upload-artifact@v4
+      with:
+        name: coverage-report
+        path: coverage-report/
+
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v3
+      with:
+        file: ./coverage.info
+        flags: unittests
+        name: codecov-umbrella
+
+  coverage-badge:
+    runs-on: ubuntu-latest
+    needs: build-and-test
+    steps:
+    - name: Generate coverage badge
+      uses: schneegans/dynamic-badges-action@v1.7.0
+      with:
+        auth: ${{ secrets.GIST_SECRET }}
+        gistID: ${{ vars.GIST_ID }}
+        filename: coverage.json
+        label: Coverage
+        message: ${{ needs.build-and-test.result == 'success' && '✅' || '❌' }}
+        color: ${{ needs.build-and-test.result == 'success' && 'green' || 'red' }}
+        namedLogo: codecov
