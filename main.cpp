@@ -4,12 +4,7 @@
 #include <fstream>
 #include <sstream>
 #include <limits>
-#include "gtest/gtest.h"
-
-// Добавляем include для coverage
-#ifdef COVERAGE
-#include <gcov.h>
-#endif
+#include <gtest/gtest.h>
 
 struct Student {
     std::string name;
@@ -21,7 +16,6 @@ struct Student {
 void loadStudents(std::vector<Student>& database, const std::string& filename) {
     std::ifstream file(filename);
     if (!file.is_open()) {
-        std::cout << "Не удалось открыть файл " << filename << "\n";
         return;
     }
     std::string line;
@@ -30,38 +24,22 @@ void loadStudents(std::vector<Student>& database, const std::string& filename) {
         Student student;
         if (iss >> student.name >> student.age >> student.major >> student.gpa) {
             database.push_back(student);
-        } else {
-            std::cout << "Ошибка чтения строки: " << line << "\n";
         }
     }
+    file.close();
 }
 
-void addStudent(std::vector<Student>& database) {
+void addStudent(std::vector<Student>& database, const std::string& name, int age, 
+                const std::string& major, double gpa) {
     Student student;
-    std::cout << "Введите имя студента: ";
-    std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-    std::getline(std::cin, student.name);
-    std::cout << "Введите возраст студента: ";
-    while (!(std::cin >> student.age) || student.age < 0) {
-        std::cout << "Неверный возраст. Введите положительное число: ";
-        std::cin.clear();
-        std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-    }
-    std::cout << "Введите специальность студента: ";
-    std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-    std::getline(std::cin, student.major);
-    std::cout << "Введите средний балл студента: ";
-    while (!(std::cin >> student.gpa) || student.gpa < 0.0 || student.gpa > 5.0) {
-        std::cout << "Неверный балл. Введите число от 0.0 до 5.0: ";
-        std::cin.clear();
-        std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-    }
+    student.name = name;
+    student.age = age;
+    student.major = major;
+    student.gpa = gpa;
     database.push_back(student);
-    std::cout << "Студент добавлен в базу данных.\n";
 }
 
 void displayStudents(const std::vector<Student>& database) {
-    std::cout << "Список студентов:\n";
     for (const Student& student : database) {
         std::cout << "Имя: " << student.name << "\n";
         std::cout << "Возраст: " << student.age << "\n";
@@ -70,11 +48,7 @@ void displayStudents(const std::vector<Student>& database) {
     }
 }
 
-void searchName(const std::vector<Student>& database) {
-    std::string name;
-    std::cout << "Введите имя студента: ";
-    std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-    std::getline(std::cin, name);
+bool searchName(const std::vector<Student>& database, const std::string& name) {
     bool found = false;
     for (const Student& student : database) {
         if (name == student.name) {
@@ -85,16 +59,10 @@ void searchName(const std::vector<Student>& database) {
             found = true;
         }
     }
-    if (!found) {
-        std::cout << "Студент с именем \"" << name << "\" не найден.\n";
-    }
+    return found;
 }
 
-void searchSpec(const std::vector<Student>& database) {
-    std::string spec;
-    std::cout << "Введите специальность: ";
-    std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-    std::getline(std::cin, spec);
+bool searchSpec(const std::vector<Student>& database, const std::string& spec) {
     bool found = false;
     for (const Student& student : database) {
         if (spec == student.major) {
@@ -105,159 +73,98 @@ void searchSpec(const std::vector<Student>& database) {
             found = true;
         }
     }
-    if (!found) {
-        std::cout << "Студент со специальностью \"" << spec << "\" не найден.\n";
-    }
+    return found;
 }
 
-// Функция для генерации coverage report
-void generateCoverageReport() {
-#ifdef COVERAGE
-    std::cout << "Генерация отчета покрытия тестами...\n";
-    // Создаем файл с coverage данными
-    std::ofstream coverage_file("coverage_report.txt");
-    if (coverage_file.is_open()) {
-        coverage_file << "Coverage Report\n";
-        coverage_file << "===============\n";
-        coverage_file << "Функции покрытые тестами:\n";
-        coverage_file << "- loadStudents()\n";
-        coverage_file << "- addStudent()\n"; 
-        coverage_file << "- displayStudents()\n";
-        coverage_file << "- searchName()\n";
-        coverage_file << "- searchSpec()\n";
-        coverage_file << "\nОбщее покрытие: 85%\n";
-        coverage_file.close();
-        std::cout << "Отчет coverage_report.txt создан\n";
-    }
-#endif
-}
-
-// Вспомогательная функция для создания тестовой базы данных
-std::vector<Student> createTestDatabase() {
+TEST(LoadStudentsTest, LoadsValidFile) {
     std::vector<Student> database;
+    // Create a temporary test file
+    std::ofstream testFile("test.txt");
+    testFile << "Иван_Иванов 20 Информатика 4.5\n";
+    testFile << "Анна_Петрова 21 Математика 4.8\n";
+    testFile.close();
     
-    Student student1;
-    student1.name = "Иван Иванов";
-    student1.age = 20;
-    student1.major = "Информатика";
-    student1.gpa = 4.5;
-    database.push_back(student1);
-    
-    Student student2;
-    student2.name = "Анна Петрова";
-    student2.age = 21;
-    student2.major = "Математика";
-    student2.gpa = 4.8;
-    database.push_back(student2);
-    
-    Student student3;
-    student3.name = "Петр Сидоров";
-    student3.age = 22;
-    student3.major = "Физика";
-    student3.gpa = 4.2;
-    database.push_back(student3);
-    
-    Student student4;
-    student4.name = "Мария Козлова";
-    student4.age = 19;
-    student4.major = "Информатика";
-    student4.gpa = 4.7;
-    database.push_back(student4);
-    
-    return database;
-}
-
-// Тесты для функции addStudent
-TEST(FunctionTesting, AddStudent) {
-    std::vector<Student> database;
-
-    Student student;
-    student.name = "Иван Иванов";
-    student.age = 20;
-    student.major = "Информатика";
-    student.gpa = 4.5;
-
-    database.push_back(student);
-
-    ASSERT_EQ(database.size(), 1);
-    EXPECT_EQ(database[0].name, "Иван Иванов");
+    loadStudents(database, "test.txt");
+    ASSERT_EQ(database.size(), 2);
+    EXPECT_EQ(database[0].name, "Иван_Иванов");
     EXPECT_EQ(database[0].age, 20);
     EXPECT_EQ(database[0].major, "Информатика");
     EXPECT_DOUBLE_EQ(database[0].gpa, 4.5);
 }
 
-// Все остальные тесты остаются без изменений...
-// [остальные тестовые функции]
+TEST(LoadStudentsTest, HandlesNonExistentFile) {
+    std::vector<Student> database;
+    loadStudents(database, "nonexistent.txt");
+    ASSERT_TRUE(database.empty());
+}
+
+TEST(AddStudentTest, AddsValidStudent) {
+    std::vector<Student> database;
+    addStudent(database, "Иван_Иванов", 20, "Информатика", 4.5);
+    
+    ASSERT_EQ(database.size(), 1);
+    EXPECT_EQ(database[0].name, "Иван_Иванов");
+    EXPECT_EQ(database[0].age, 20);
+    EXPECT_EQ(database[0].major, "Информатика");
+    EXPECT_DOUBLE_EQ(database[0].gpa, 4.5);
+}
+
+TEST(SearchNameTest, FindsExistingStudent) {
+    std::vector<Student> database;
+    addStudent(database, "Иван_Иванов", 20, "Информатика", 4.5);
+    testing::internal::CaptureStdout();
+    bool found = searchName(database, "Иван_Иванов");
+    std::string output = testing::internal::GetCapturedStdout();
+    
+    EXPECT_TRUE(found);
+    EXPECT_NE(output.find("Имя: Иван_Иванов"), std::string::npos);
+}
+
+TEST(SearchNameTest, HandlesNonExistentStudent) {
+    std::vector<Student> database;
+    addStudent(database, "Иван_Иванов", 20, "Информатика", 4.5);
+    testing::internal::CaptureStdout();
+    bool found = searchName(database, "Анна_Петрова");
+    std::string output = testing::internal::GetCapturedStdout();
+    
+    EXPECT_FALSE(found);
+}
+
+TEST(SearchSpecTest, FindsExistingMajor) {
+    std::vector<Student> database;
+    addStudent(database, "Иван_Иванов", 20, "Информатика", 4.5);
+    testing::internal::CaptureStdout();
+    bool found = searchSpec(database, "Информатика");
+    std::string output = testing::internal::GetCapturedStdout();
+    
+    EXPECT_TRUE(found);
+    EXPECT_NE(output.find("Специальность: Информатика"), std::string::npos);
+}
+
+TEST(SearchSpecTest, HandlesNonExistentMajor) {
+    std::vector<Student> database;
+    addStudent(database, "Иван_Иванов", 20, "Информатика", 4.5);
+    testing::internal::CaptureStdout();
+    bool found = searchSpec(database, "Математика");
+    std::string output = testing::internal::GetCapturedStdout();
+    
+    EXPECT_FALSE(found);
+}
+
+TEST(DisplayStudentsTest, DisplaysCorrectly) {
+    std::vector<Student> database;
+    addStudent(database, "Иван_Иванов", 20, "Информатика", 4.5);
+    testing::internal::CaptureStdout();
+    displayStudents(database);
+    std::string output = testing::internal::GetCapturedStdout();
+    
+    EXPECT_NE(output.find("Имя: Иван_Иванов"), std::string::npos);
+    EXPECT_NE(output.find("Возраст: 20"), std::string::npos);
+    EXPECT_NE(output.find("Специальность: Информатика"), std::string::npos);
+    EXPECT_NE(output.find("Средний балл: 4.5"), std::string::npos);
+}
 
 int main(int argc, char **argv) {
-    // Режим тестирования
-    if (argc > 1 && std::string(argv[1]) == "--run-tests") {
-        ::testing::InitGoogleTest(&argc, argv);
-        int test_result = RUN_ALL_TESTS();
-        
-        // Генерируем отчет о покрытии после тестов
-        generateCoverageReport();
-        return test_result;
-    }
-
-    // Режим coverage report
-    if (argc > 1 && std::string(argv[1]) == "--coverage") {
-        generateCoverageReport();
-        return 0;
-    }
-
-    // Обычный режим работы
-    std::vector<Student> database;
-    loadStudents(database, "bd.txt");
-    int choice;
-
-    do {
-        std::cout << "Меню:\n";
-        std::cout << "1. Добавить студента\n";
-        std::cout << "2. Вывести список студентов\n";
-        std::cout << "3. Найти по имени\n";
-        std::cout << "4. Найти по специальности\n";
-        std::cout << "5. Запустить тесты\n";
-        std::cout << "6. Сгенерировать отчет покрытия\n";
-        std::cout << "0. Выход\n";
-        std::cout << "Выберите действие: ";
-
-        if (!(std::cin >> choice)) {
-            std::cout << "Неверный выбор. Попробуйте снова.\n";
-            std::cin.clear();
-            std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-            continue;
-        }
-
-        switch (choice) {
-            case 1:
-                addStudent(database);
-                break;
-            case 2:
-                displayStudents(database);
-                break;
-            case 3:
-                searchName(database);
-                break;
-            case 4:
-                searchSpec(database);
-                break;
-            case 5:
-                std::cout << "Для запуска тестов перезапустите программу с параметром --run-tests\n";
-                break;
-            case 6:
-                generateCoverageReport();
-                break;
-            case 0:
-                std::cout << "Выход из программы.\n";
-                break;
-            default:
-                std::cout << "Неверный выбор. Попробуйте снова.\n";
-        }
-
-        std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-
-    } while (choice != 0);
-
-    return 0;
+    ::testing::InitGoogleTest(&argc, argv);
+    return RUN_ALL_TESTS();
 }
