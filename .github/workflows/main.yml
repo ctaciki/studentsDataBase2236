@@ -16,36 +16,37 @@ jobs:
     - name: Install dependencies
       run: |
         sudo apt-get update
-        sudo apt-get install -y build-essential g++ libgtest-dev cmake gcovr lcov
-        cd /usr/src/gtest
-        sudo cmake .
-        sudo make
-        sudo cp lib/*.a /usr/lib/
-
-    - name: Compile with coverage
+        sudo apt-get install -y libgtest-dev cmake gcovr
+        cd /usr/src/gtest && sudo cmake . && sudo make && sudo cp lib/*.a /usr/lib/
+        
+    - name: Build, test and generate coverage
       run: |
-        g++ --coverage -c main.cpp -o main.o
-        g++ --coverage -c utils.cpp -o utils.o
-        g++ --coverage main.o utils.o -o program.out
-
-    - name: Execute tests
-      run: ./program.out --run-tests
-
-    - name: Generate coverage report
+        g++ -std=c++17 --coverage -o program.out main.cpp -lgtest -lgtest_main -pthread
+        ./program.out --test
+        gcovr --xml coverage.cobertura.xml
+        
+    - name: Extract coverage percentage
+      id: coverage
       run: |
-        gcovr -r . --txt -o coverage.txt
-        gcovr -r . --html --html-details -o coverage.html
-        gcovr -r . --xml-pretty -o coverage.xml
-        gcovr -r . --json -o coverage.json
-
-    - name: Generate coverage badge
-      uses: tj-actions/coverage-badge-py@v2
+        COVERAGE=$(grep -o 'line-rate="[0-9.]*"' coverage.cobertura.xml | head -1 | grep -o '[0-9.]*' | awk '{print int($1*100)}')
+        if [ -z "$COVERAGE" ]; then COVERAGE=0; fi
+        echo "percentage=$COVERAGE" >> $GITHUB_OUTPUT
+        
+        if [ "$COVERAGE" -ge 90 ]; then COLOR="brightgreen"
+        elif [ "$COVERAGE" -ge 80 ]; then COLOR="green"  
+        elif [ "$COVERAGE" -ge 70 ]; then COLOR="yellowgreen"
+        elif [ "$COVERAGE" -ge 60 ]; then COLOR="yellow"
+        else COLOR="red"; fi
+        
+        echo "color=$COLOR" >> $GITHUB_OUTPUT
+        echo "Coverage: $COVERAGE% (Color: $COLOR)"
+        
+    - name: Update coverage badge in README
+      uses: schneegans/dynamic-badges-action@v1.0.0
       with:
-        file: coverage.txt
-        output: coverage-badge.svg
-
-    - name: Upload coverage badge
-      uses: actions/upload-artifact@v4
-      with:
-        name: coverage-badge
-        path: coverage-badge.svg
+        auth: ${{ secrets.GIST_TOKEN }}
+        gistID: ${{ secrets.GIST_ID }}
+        filename: coverage.json
+        label: Test coverage
+        message: ${{ steps.coverage.outputs.percentage }}%
+        color: ${{ steps.coverage.outputs.color }}
